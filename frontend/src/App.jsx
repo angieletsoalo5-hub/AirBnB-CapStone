@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Reservations from "./pages/Reservations";
 import ListingDetails from "./pages/ListingDetails";
+import SearchResults from "./pages/SearchResults";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -21,6 +22,11 @@ function App() {
       <Route
         path="/"
         element={<Home />}
+      />
+
+      <Route
+       path="/search"
+       element={<SearchResults />}
       />
 
       <Route

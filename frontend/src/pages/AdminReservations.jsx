@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import AdminHeader from "../components/AdminHeader";
 
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5001/api";
+
 function AdminReservations() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +16,7 @@ function AdminReservations() {
         const token = localStorage.getItem("token");
 
         const response = await fetch(
-          "http://localhost:5001/api/reservations/admin/all",
+          `${API_URL}/reservations/admin/all`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

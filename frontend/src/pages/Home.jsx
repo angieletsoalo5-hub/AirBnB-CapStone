@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import {
-  getAccommodations,
-  getAvailableAccommodations,
-} from "../services/api.js";
+import { getAccommodations } from "../services/api.js";
+import { getListingRating } from "../utils/ratings.js";
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80";
 
+const heroImage =
+  "https://images.unsplash.com/photo-1706808849780-7a04fbac83ef?q=80&w=2532&auto=format&fit=crop&ixlib=rb-4.1.0";
+
 function Home() {
+  const navigate = useNavigate();
+
   const [accommodations, setAccommodations] = useState([]);
-  const [filteredAccommodations, setFilteredAccommodations] =
-    useState([]);
 
   const [searchLocation, setSearchLocation] = useState("");
   const [checkIn, setCheckIn] = useState("");
@@ -20,15 +21,12 @@ function Home() {
   const [guestCount, setGuestCount] = useState("");
 
   const [searchError, setSearchError] = useState("");
-  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     const loadAccommodations = async () => {
       try {
         const data = await getAccommodations();
-
         setAccommodations(data);
-        setFilteredAccommodations(data);
       } catch (error) {
         console.error(
           "Error loading accommodations:",
@@ -40,76 +38,59 @@ function Home() {
     loadAccommodations();
   }, []);
 
-  const handleSearch = async () => {
-    try {
-      setSearching(true);
-      setSearchError("");
+  const handleSearch = () => {
+    setSearchError("");
 
-      if (
-        (checkIn && !checkOut) ||
-        (!checkIn && checkOut)
-      ) {
-        setSearchError(
-          "Please select both check-in and check-out dates."
-        );
-        return;
-      }
-
-      if (
-        checkIn &&
-        checkOut &&
-        new Date(checkOut) <= new Date(checkIn)
-      ) {
-        setSearchError(
-          "Check-out date must be after check-in date."
-        );
-        return;
-      }
-
-      let accommodationsToSearch = accommodations;
-
-      if (checkIn && checkOut) {
-        accommodationsToSearch =
-          await getAvailableAccommodations(
-            checkIn,
-            checkOut
-          );
-      }
-
-      const searchTerm = searchLocation
-        .trim()
-        .toLowerCase();
-
-      const guests = Number(guestCount);
-
-      const results = accommodationsToSearch.filter(
-        (accommodation) => {
-          const title =
-            accommodation.title?.toLowerCase() || "";
-
-          const location =
-            accommodation.location?.toLowerCase() || "";
-
-          const matchesLocation =
-            !searchTerm ||
-            title.includes(searchTerm) ||
-            location.includes(searchTerm);
-
-          const matchesGuests =
-            !guestCount ||
-            accommodation.maxGuests >= guests;
-
-          return matchesLocation && matchesGuests;
-        }
+    if (
+      (checkIn && !checkOut) ||
+      (!checkIn && checkOut)
+    ) {
+      setSearchError(
+        "Please select both check-in and check-out dates."
       );
-
-      setFilteredAccommodations(results);
-    } catch (error) {
-      setSearchError(error.message);
-      setFilteredAccommodations([]);
-    } finally {
-      setSearching(false);
+      return;
     }
+
+    if (
+      checkIn &&
+      checkOut &&
+      new Date(checkOut) <= new Date(checkIn)
+    ) {
+      setSearchError(
+        "Check-out date must be after check-in date."
+      );
+      return;
+    }
+
+    const params = new URLSearchParams();
+
+    if (searchLocation.trim()) {
+      params.set("location", searchLocation.trim());
+    }
+
+    if (checkIn) {
+      params.set("checkIn", checkIn);
+    }
+
+    if (checkOut) {
+      params.set("checkOut", checkOut);
+    }
+
+    if (guestCount) {
+      params.set("guests", guestCount);
+    }
+
+    const queryString = params.toString();
+
+    navigate(
+      queryString
+        ? `/search?${queryString}`
+        : "/search"
+    );
+  };
+
+  const handleFlexibleSearch = () => {
+    navigate("/search");
   };
 
   return (
@@ -124,9 +105,7 @@ function Home() {
               FIND YOUR PERFECT GETAWAY
             </p>
 
-            <h1>
-              Find your next stay
-            </h1>
+            <h1>Find your next stay</h1>
 
             <p className="hero-subtitle">
               Search unique homes, stays and experiences
@@ -189,10 +168,10 @@ function Home() {
 
             <button
               className="search-button"
+              type="button"
               onClick={handleSearch}
-              disabled={searching}
             >
-              {searching ? "Searching..." : "Search"}
+              Search
             </button>
           </div>
 
@@ -203,13 +182,32 @@ function Home() {
           )}
         </section>
 
+        {/* FIGMA-STYLE IMAGE HERO */}
+        <section className="home-image-hero">
+          <img
+            src={heroImage}
+            alt="Beautiful holiday home"
+          />
+
+          <div className="home-image-overlay"></div>
+
+          <div className="home-image-content">
+            <h2>Not sure where to go? Perfect.</h2>
+
+            <button
+              type="button"
+              onClick={handleFlexibleSearch}
+            >
+              I'm flexible
+            </button>
+          </div>
+        </section>
+
         {/* AVAILABLE STAYS */}
         <section className="listings-section home-section">
           <div className="section-heading">
             <div>
-              <p className="section-eyebrow">
-                STAYS
-              </p>
+              <p className="section-eyebrow">STAYS</p>
 
               <h2>Available stays</h2>
             </div>
@@ -219,74 +217,71 @@ function Home() {
             </p>
           </div>
 
-          {filteredAccommodations.length === 0 ? (
+          {accommodations.length === 0 ? (
             <div className="no-results">
               <h3>No stays found</h3>
 
               <p>
-                Try another destination, date range or
-                guest count.
+                There are currently no stays available.
               </p>
             </div>
           ) : (
             <div className="listings-grid">
-              {filteredAccommodations.map(
-                (accommodation) => (
-                  <Link
-                    to={`/listing/${accommodation._id}`}
-                    className="listing-card"
-                    key={accommodation._id}
-                  >
-                    <div className="listing-image-wrapper">
-                      <img
-                        src={
-                          accommodation.images?.[0] ||
-                          fallbackImage
-                        }
-                        alt={accommodation.title}
-                        onError={(e) => {
-                          e.currentTarget.src =
-                            fallbackImage;
-                        }}
-                      />
+              {accommodations.map((accommodation) => (
+                <Link
+                  to={`/listing/${accommodation._id}`}
+                  className="listing-card"
+                  key={accommodation._id}
+                >
+                  <div className="listing-image-wrapper">
+                    <img
+                      src={
+                        accommodation.images?.[0] ||
+                        fallbackImage
+                      }
+                      alt={accommodation.title}
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          fallbackImage;
+                      }}
+                    />
 
-                      <span className="guest-favourite">
-                        Guest favourite
+                    <span className="guest-favourite">
+                      Guest favourite
+                    </span>
+                  </div>
+
+                  <div className="listing-card-content">
+                    <div className="listing-card-title-row">
+                      <h3>{accommodation.title}</h3>
+
+                      <span>
+                          ★ {getListingRating(accommodation)}
                       </span>
                     </div>
 
-                    <div className="listing-card-content">
-                      <div className="listing-card-title-row">
-                        <h3>
-                          {accommodation.title}
-                        </h3>
+                    <p className="listing-location">
+                      {accommodation.location}
+                    </p>
 
-                        <span>★ 4.9</span>
-                      </div>
+                    <p className="listing-details">
+                      {accommodation.bedrooms} bedroom
+                      {accommodation.bedrooms !== 1
+                        ? "s"
+                        : ""}{" "}
+                      · up to{" "}
+                      {accommodation.maxGuests} guests
+                    </p>
 
-                      <p className="listing-location">
-                        {accommodation.location}
-                      </p>
-
-                      <p className="listing-details">
-                        {accommodation.bedrooms} bedroom
-                        {accommodation.bedrooms !== 1
-                          ? "s"
-                          : ""}{" "}
-                        · up to{" "}
-                        {accommodation.maxGuests} guests
-                      </p>
-
-                      <p className="listing-price">
-                        <strong>
-                          R{accommodation.price}
-                        </strong>{" "}
-                        night
-                      </p>
-                    </div>
-                  </Link>
-                )
-              )}
+                    <p className="listing-price">
+                      <strong>
+                        R{accommodation.price}
+                      </strong>{" "}
+                      night
+                    </p>
+                  </div>
+                </Link>
+              ))}
             </div>
           )}
         </section>
@@ -314,6 +309,7 @@ function Home() {
 
               <div>
                 <h3>Cape Town</h3>
+
                 <p>
                   Mountains, beaches and city adventures.
                 </p>
@@ -328,6 +324,7 @@ function Home() {
 
               <div>
                 <h3>Johannesburg</h3>
+
                 <p>
                   Culture, food and unforgettable city
                   stays.
@@ -343,6 +340,7 @@ function Home() {
 
               <div>
                 <h3>Durban</h3>
+
                 <p>
                   Warm beaches and relaxed coastal
                   escapes.
@@ -358,6 +356,7 @@ function Home() {
 
               <div>
                 <h3>Nature escapes</h3>
+
                 <p>
                   Slow down and reconnect with nature.
                 </p>
@@ -559,9 +558,7 @@ function Home() {
             Sitemap
           </p>
 
-          <p>
-            English (ZA) · ZAR
-          </p>
+          <p>English (ZA) · ZAR</p>
         </div>
       </footer>
     </div>

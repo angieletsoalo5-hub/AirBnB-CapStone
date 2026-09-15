@@ -6,13 +6,137 @@ import {
   createReservation,
 } from "../services/api.js";
 
-const fallbackImages = [
-  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80",
-  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80",
-  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=80",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80",
-  "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1000&q=80",
-];
+/*
+  Each location has its own gallery.
+  These images fill the gallery for each property.
+*/
+const propertyGalleries = {
+  campsBay: [
+    "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=80",
+    "https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1600684388091-627109f3cd60?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1000&q=80",
+  ],
+
+  clifton: [
+    "https://images.unsplash.com/photo-1616594092403-fb65629b0a46?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1600607688960-e095ff83135c?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1600585152915-d208bec867a1?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1000&q=80",
+  ],
+
+  seaPoint: [
+    "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1560448075-bb485b067938?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1560185008-b033106af5c3?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?auto=format&fit=crop&w=1000&q=80",
+  ],
+
+  stellenbosch: [
+    "https://images.unsplash.com/photo-1631048501851-4aa85ffc3be8?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1725905803121-dd123b058a5c?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1721062754942-8453d9c66f97?auto=format&fit=crop&w=1400&q=80",
+    "https://images.unsplash.com/photo-1715090576114-c07384af2069?auto=format&fit=crop&w=1000&q=80",
+  ],
+
+  knysna: [
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=80",
+    "https://images.unsplash.com/photo-1724582586458-a51791349977?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1596205250168-c3583813eea0?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1696762932825-2737db830bbe?auto=format&fit=crop&w=1000&q=80",
+    "https://plus.unsplash.com/premium_photo-1733514691620-57565f5f6137?auto=format&fit=crop&w=1000&q=80",
+  ],
+
+  umhlanga: [
+    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1000&q=80",
+    "https://plus.unsplash.com/premium_photo-1661962346904-8a489ef9b9e7?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1605549339992-83721992836e?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1704383014594-01bc24b6b840?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1629079447777-1e605162dc8d?auto=format&fit=crop&w=1000&q=80",
+  ],
+
+  default: [
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=80",
+    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1000&q=80",
+  ],
+};
+
+function getGalleryForAccommodation(accommodation) {
+  const location =
+    accommodation?.location?.toLowerCase() || "";
+  const title =
+    accommodation?.title?.toLowerCase() || "";
+
+  if (
+    location.includes("camps bay") ||
+    title.includes("camps bay")
+  ) {
+    return propertyGalleries.campsBay;
+  }
+
+  if (
+    location.includes("clifton") ||
+    title.includes("clifton")
+  ) {
+    return propertyGalleries.clifton;
+  }
+
+  if (
+    location.includes("sea point") ||
+    title.includes("sea point")
+  ) {
+    return propertyGalleries.seaPoint;
+  }
+
+  if (
+    location.includes("stellenbosch") ||
+    title.includes("stellenbosch")
+  ) {
+    return propertyGalleries.stellenbosch;
+  }
+
+  if (
+    location.includes("knysna") ||
+    title.includes("knysna")
+  ) {
+    return propertyGalleries.knysna;
+  }
+
+  if (
+    location.includes("umhlanga") ||
+    title.includes("umhlanga")
+  ) {
+    return propertyGalleries.umhlanga;
+  }
+
+  return propertyGalleries.default;
+}
+
+/*
+  Give each property its own rating.
+  Keep these values the same as Home.jsx
+  and SearchResults.jsx.
+*/
+function getRatingForAccommodation(accommodation) {
+  const title =
+    accommodation?.title?.toLowerCase() || "";
+
+  if (title.includes("camps bay")) return "4.9";
+  if (title.includes("clifton")) return "4.8";
+  if (title.includes("sea point")) return "4.7";
+  if (title.includes("stellenbosch")) return "4.9";
+  if (title.includes("knysna")) return "4.8";
+  if (title.includes("umhlanga")) return "4.6";
+
+  return "4.8";
+}
 
 function ListingDetails() {
   const { id } = useParams();
@@ -33,9 +157,7 @@ function ListingDetails() {
   useEffect(() => {
     const loadAccommodation = async () => {
       try {
-        const data =
-          await getAccommodationById(id);
-
+        const data = await getAccommodationById(id);
         setAccommodation(data);
       } catch (error) {
         console.error(
@@ -56,12 +178,10 @@ function ListingDetails() {
     const startDate = new Date(checkIn);
     const endDate = new Date(checkOut);
 
-    const difference =
-      endDate - startDate;
+    const difference = endDate - startDate;
 
     const calculatedNights = Math.ceil(
-      difference /
-        (1000 * 60 * 60 * 24)
+      difference / (1000 * 60 * 60 * 24)
     );
 
     return calculatedNights > 0
@@ -104,8 +224,7 @@ function ListingDetails() {
   const handleBooking = async (e) => {
     e.preventDefault();
 
-    const token =
-      localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       navigate("/login");
@@ -116,7 +235,6 @@ function ListingDetails() {
       setBookingMessage(
         "Please select your check-in and check-out dates."
       );
-
       return;
     }
 
@@ -124,18 +242,13 @@ function ListingDetails() {
       setBookingMessage(
         "Check-out date must be after the check-in date."
       );
-
       return;
     }
 
-    if (
-      Number(guests) >
-      accommodation.maxGuests
-    ) {
+    if (Number(guests) > accommodation.maxGuests) {
       setBookingMessage(
         `This stay allows a maximum of ${accommodation.maxGuests} guests.`
       );
-
       return;
     }
 
@@ -144,8 +257,7 @@ function ListingDetails() {
       setBookingMessage("");
 
       await createReservation({
-        accommodation:
-          accommodation._id,
+        accommodation: accommodation._id,
         checkIn,
         checkOut,
         guests: Number(guests),
@@ -172,13 +284,14 @@ function ListingDetails() {
     );
   }
 
+  const selectedGallery =
+    getGalleryForAccommodation(accommodation);
+
+  const rating =
+    getRatingForAccommodation(accommodation);
+
   const propertyImages =
-    accommodation.images?.length > 0
-      ? [
-          ...accommodation.images,
-          ...fallbackImages,
-        ].slice(0, 5)
-      : fallbackImages;
+    selectedGallery.slice(0, 5);
 
   return (
     <div className="listing-details-wrapper">
@@ -189,19 +302,13 @@ function ListingDetails() {
 
         <section className="listing-details-heading">
           <div>
-            <h1>
-              {accommodation.title}
-            </h1>
+            <h1>{accommodation.title}</h1>
 
             <div className="listing-heading-meta">
-              <span>★ 4.9</span>
-
+              <span>★ {rating}</span>
               <span>·</span>
-
               <span>Guest favourite</span>
-
               <span>·</span>
-
               <span>
                 {accommodation.location}
               </span>
@@ -227,8 +334,9 @@ function ListingDetails() {
               src={propertyImages[0]}
               alt={accommodation.title}
               onError={(e) => {
+                e.currentTarget.onerror = null;
                 e.currentTarget.src =
-                  fallbackImages[0];
+                  selectedGallery[0];
               }}
             />
           </div>
@@ -238,15 +346,17 @@ function ListingDetails() {
               .slice(1, 5)
               .map((image, index) => (
                 <img
-                  key={index}
+                  key={`${image}-${index}`}
                   src={image}
                   alt={`${accommodation.title} ${
                     index + 2
                   }`}
                   onError={(e) => {
+                    e.currentTarget.onerror = null;
                     e.currentTarget.src =
-                      fallbackImages[
-                        index + 1
+                      selectedGallery[
+                        (index + 1) %
+                          selectedGallery.length
                       ];
                   }}
                 />
@@ -267,14 +377,12 @@ function ListingDetails() {
               </h2>
 
               <p className="listing-summary-meta">
-                Up to{" "}
-                {accommodation.maxGuests} guests ·{" "}
+                Up to {accommodation.maxGuests} guests ·{" "}
                 {accommodation.bedrooms} bedroom
                 {accommodation.bedrooms !== 1
                   ? "s"
                   : ""}{" "}
-                ·{" "}
-                {accommodation.bathrooms} bathroom
+                · {accommodation.bathrooms} bathroom
                 {accommodation.bathrooms !== 1
                   ? "s"
                   : ""}
@@ -291,8 +399,7 @@ function ListingDetails() {
               <div>
                 <h3>
                   Hosted by{" "}
-                  {accommodation.host
-                    ?.username ||
+                  {accommodation.host?.username ||
                     "Airbnb Host"}
                 </h3>
 
@@ -310,13 +417,11 @@ function ListingDetails() {
                 <span>🏡</span>
 
                 <div>
-                  <h3>
-                    Entire place
-                  </h3>
+                  <h3>Entire place</h3>
 
                   <p>
-                    You'll have the property
-                    to yourself.
+                    You'll have the property to
+                    yourself.
                   </p>
                 </div>
               </div>
@@ -325,9 +430,7 @@ function ListingDetails() {
                 <span>✨</span>
 
                 <div>
-                  <h3>
-                    Guest favourite
-                  </h3>
+                  <h3>Guest favourite</h3>
 
                   <p>
                     One of the most loved homes
@@ -340,9 +443,7 @@ function ListingDetails() {
                 <span>📍</span>
 
                 <div>
-                  <h3>
-                    Great location
-                  </h3>
+                  <h3>Great location</h3>
 
                   <p>
                     Enjoy easy access to the
@@ -365,9 +466,7 @@ function ListingDetails() {
             {/* AMENITIES */}
 
             <div className="listing-content-section">
-              <h2>
-                What this place offers
-              </h2>
+              <h2>What this place offers</h2>
 
               {accommodation.amenities?.length >
               0 ? (
@@ -379,7 +478,6 @@ function ListingDetails() {
                         key={index}
                       >
                         <span>✓</span>
-
                         <p>{amenity}</p>
                       </div>
                     )
@@ -444,13 +542,8 @@ function ListingDetails() {
                 <div>
                   <h3>House rules</h3>
 
-                  <p>
-                    Check-in after 15:00
-                  </p>
-
-                  <p>
-                    Checkout before 11:00
-                  </p>
+                  <p>Check-in after 15:00</p>
+                  <p>Checkout before 11:00</p>
 
                   <p>
                     Maximum{" "}
@@ -462,13 +555,8 @@ function ListingDetails() {
                 <div>
                   <h3>Safety</h3>
 
-                  <p>
-                    Smoke alarm
-                  </p>
-
-                  <p>
-                    Secure property
-                  </p>
+                  <p>Smoke alarm</p>
+                  <p>Secure property</p>
 
                   <p>
                     Emergency contact available
@@ -507,7 +595,7 @@ function ListingDetails() {
               </div>
 
               <div className="booking-rating">
-                ★ 4.9 · Guest favourite
+                ★ {rating} · Guest favourite
               </div>
 
               <form
@@ -516,9 +604,7 @@ function ListingDetails() {
               >
                 <div className="booking-date-row">
                   <div className="booking-field">
-                    <label>
-                      Check in
-                    </label>
+                    <label>Check in</label>
 
                     <input
                       type="date"
@@ -533,9 +619,7 @@ function ListingDetails() {
                   </div>
 
                   <div className="booking-field">
-                    <label>
-                      Check out
-                    </label>
+                    <label>Check out</label>
 
                     <input
                       type="date"
@@ -561,9 +645,7 @@ function ListingDetails() {
                     }
                     value={guests}
                     onChange={(e) =>
-                      setGuests(
-                        e.target.value
-                      )
+                      setGuests(e.target.value)
                     }
                     required
                   />
@@ -600,9 +682,7 @@ function ListingDetails() {
                       {nights !== 1 ? "s" : ""}
                     </span>
 
-                    <span>
-                      R{stayPrice}
-                    </span>
+                    <span>R{stayPrice}</span>
                   </div>
 
                   {weeklyDiscount > 0 && (
@@ -619,10 +699,7 @@ function ListingDetails() {
 
                   {cleaningFee > 0 && (
                     <div>
-                      <span>
-                        Cleaning fee
-                      </span>
-
+                      <span>Cleaning fee</span>
                       <span>
                         R{cleaningFee}
                       </span>
@@ -631,10 +708,7 @@ function ListingDetails() {
 
                   {serviceFee > 0 && (
                     <div>
-                      <span>
-                        Service fee
-                      </span>
-
+                      <span>Service fee</span>
                       <span>
                         R{serviceFee}
                       </span>
@@ -654,9 +728,7 @@ function ListingDetails() {
                   )}
 
                   <div className="booking-total">
-                    <strong>
-                      Total
-                    </strong>
+                    <strong>Total</strong>
 
                     <strong>
                       R{estimatedTotal}

@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from "../components/AdminHeader";
 
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5001/api";
+
 function CreateListing() {
   const navigate = useNavigate();
 
@@ -47,7 +51,7 @@ function CreateListing() {
       setMessage("");
 
       const response = await fetch(
-        "http://localhost:5001/api/accommodations",
+        `${API_URL}/accommodations`,
         {
           method: "POST",
           headers: {
