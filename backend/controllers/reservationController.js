@@ -162,8 +162,9 @@ const deleteReservation = asyncHandler(async (req, res) => {
     throw new Error('Reservation not found');
   }
 
-  const isOwner = reservation.user.toString() === req.user._id.toString();
-  const isHost = reservation.host.toString() === req.user._id.toString();
+  const userId = req.user._id.toString();
+  const isOwner = reservation.user?.toString() === userId;
+  const isHost = reservation.host?.toString() === userId;
 
   if (!isOwner && !isHost) {
     res.status(403);

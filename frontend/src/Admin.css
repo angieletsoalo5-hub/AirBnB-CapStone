@@ -6,15 +6,8 @@
   color: #222;
 }
 
-.admin-login-shell {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
 .admin-login-page {
-  min-height: 0;
-  flex: 1;
+  min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 32px 20px;
@@ -146,15 +139,13 @@
   border-bottom: 1px solid #e8e8e8;
 }
 
-.admin-dashboard .site-footer,
-.admin-login-shell .site-footer {
+.admin-dashboard .site-footer {
   margin-top: auto;
   border-top: 1px solid #e8e8e8;
   background: #f7f7f7;
 }
 
-.admin-dashboard .footer-bottom,
-.admin-login-shell .footer-bottom {
+.admin-dashboard .footer-bottom {
   background: #f7f7f7;
 }
 
