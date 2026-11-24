@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import AdminHeader from "../components/AdminHeader";
+import Footer from "../components/Footer";
 
 function UpdateListing() {
   const { id } = useParams();
@@ -123,6 +124,7 @@ function UpdateListing() {
             <p>Loading listing...</p>
           </div>
         </main>
+        <Footer />
       </div>
     );
   }
@@ -340,18 +342,22 @@ function UpdateListing() {
               </p>
             )}
 
-            <button
-              type="submit"
-              className="admin-primary-button create-listing-submit"
-              disabled={saving}
-            >
-              {saving
-                ? "Saving..."
-                : "Save Changes"}
-            </button>
+            <div className="create-listing-actions">
+              <button
+                type="submit"
+                className="admin-primary-button create-listing-submit"
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save changes"}
+              </button>
+              <Link to="/admin/listings" className="admin-form-cancel">
+                Cancel
+              </Link>
+            </div>
           </form>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

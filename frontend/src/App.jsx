@@ -4,7 +4,7 @@
  * client-side routing with React Router v6.
  */
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import './Admin.css';
 import Home from './pages/Home';
@@ -12,7 +12,6 @@ import Location from './pages/Location';
 import LocationDetails from './pages/LocationDetails';
 import Login from './pages/Login';
 import Reservations from './pages/Reservations';
-import AdminDashboard from './pages/AdminDashboard';
 import AdminListings from './pages/AdminListings';
 import AdminLogin from './pages/AdminLogin';
 import AdminReservations from './pages/AdminReservations';
@@ -38,11 +37,7 @@ export default function App() {
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin"
-            element={
-              <ProtectedAdminRoute>
-                <AdminDashboard />
-              </ProtectedAdminRoute>
-            }
+            element={<Navigate to="/admin/listings" replace />}
           />
           <Route
             path="/admin/listings"
