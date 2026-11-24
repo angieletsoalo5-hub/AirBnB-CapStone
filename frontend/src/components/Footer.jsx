@@ -1,3 +1,9 @@
+/**
+ * Footer – four-column layout matching Airbnb's footer with
+ * Support / Community / Hosting / Airbnb columns plus the
+ * copyright + language/currency bar at the bottom.
+ */
+
 import { useEffect, useRef, useState } from 'react';
 import './Footer.css';
 
@@ -15,19 +21,44 @@ function GlobeIcon() {
 const FOOTER_COLUMNS = [
   {
     heading: 'Support',
-    links: ['Help Center', 'Safety information', 'Cancellation options', 'Our COVID-19 Response', 'Supporting people with disabilities', 'Report a neighborhood concern'],
+    links: [
+      'Help Center',
+      'Safety information',
+      'Cancellation options',
+      'Our COVID-19 Response',
+      'Supporting people with disabilities',
+      'Report a neighborhood concern',
+    ],
   },
   {
     heading: 'Community',
-    links: ['Airbnb.org: disaster relief housing', 'Support: Afghan refugees', 'Celebrating diversity & belonging', 'Combating discrimination'],
+    links: [
+      'Airbnb.org: disaster relief housing',
+      'Support: Afghan refugees',
+      'Celebrating diversity & belonging',
+      'Combating discrimination',
+    ],
   },
   {
     heading: 'Hosting',
-    links: ['Try hosting', 'AirCover: protection for Hosts', 'Explore hosting resources', 'Visit our community forum', 'How to host responsibly'],
+    links: [
+      'Try hosting',
+      'AirCover: protection for Hosts',
+      'Explore hosting resources',
+      'Visit our community forum',
+      'How to host responsibly',
+    ],
   },
   {
     heading: 'About',
-    links: ['Newsroom', 'Learn about new features', 'Letter from our founders', 'Careers', 'Investors', 'Airbnb Luxe'],
+    links: [
+      'Newsroom',
+      'Learn about new features',
+      'Letter from our founders',
+      'Careers',
+      'Investors',
+      'Airbnb Luxe',
+    ],
   },
 ];
 
@@ -47,6 +78,8 @@ export default function Footer() {
 
   return (
     <footer className="site-footer" aria-label="Site footer">
+
+      {/* ── Main columns ── */}
       <div className="footer-columns container">
         {FOOTER_COLUMNS.map((col) => (
           <nav key={col.heading} className="footer-col" aria-label={col.heading}>
@@ -54,7 +87,10 @@ export default function Footer() {
             <ul className="footer-col__list">
               {col.links.map((link) => (
                 <li key={link}>
-                  <a href="#top" className="footer-link">{link}</a>
+                  {/* All links are internal anchors in this demo */}
+                  <a href="#top" className="footer-link">
+                    {link}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -62,6 +98,7 @@ export default function Footer() {
         ))}
       </div>
 
+      {/* ── Bottom bar ── */}
       <div className="footer-bottom">
         <div className="footer-bottom__inner container">
           <p className="footer-copyright">
@@ -75,7 +112,7 @@ export default function Footer() {
 
           <div className="footer-bottom__right">
             <div className="footer-language" ref={languageRef}>
-              <button className="footer-locale-btn" type="button" onClick={() => setLanguageOpen((o) => !o)} aria-label={`Change language, currently ${language}`} aria-expanded={languageOpen} aria-haspopup="menu">
+              <button className="footer-locale-btn" type="button" onClick={() => setLanguageOpen((open) => !open)} aria-label={`Change language, currently ${language}`} aria-expanded={languageOpen} aria-haspopup="menu">
                 <GlobeIcon />
                 {language}
               </button>
@@ -90,7 +127,9 @@ export default function Footer() {
               )}
             </div>
 
-            <button className="footer-locale-btn" aria-label="Change currency">R&nbsp;ZAR</button>
+            <button className="footer-locale-btn" aria-label="Change currency">
+              R&nbsp;ZAR
+            </button>
 
             <div className="footer-socials" aria-label="Social media links">
               <a href="#top" className="footer-social-link" aria-label="Facebook">

@@ -1,5 +1,6 @@
 /* ============================================================
    Guest Login / Sign-up
+   Centered Airbnb-style authentication card
    ============================================================ */
 
 .login-page {
@@ -11,6 +12,8 @@
   padding: 32px 20px;
   position: relative;
 }
+
+/* Back to home */
 
 .login-back {
   position: absolute;
@@ -25,7 +28,11 @@
   transition: background 0.2s ease;
 }
 
-.login-back:hover { background: #eeeeee; }
+.login-back:hover {
+  background: #eeeeee;
+}
+
+/* Card */
 
 .login-card {
   width: 100%;
@@ -33,9 +40,11 @@
   background: #ffffff;
   border: 1px solid #dddddd;
   border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
+
+/* Header */
 
 .login-card__header {
   text-align: center;
@@ -51,7 +60,11 @@
   margin-bottom: 14px;
 }
 
-.login-logo-mark { width: 30px; height: 30px; color: #ff385c; }
+.login-logo-mark {
+  width: 30px;
+  height: 30px;
+  color: #ff385c;
+}
 
 .login-logo-text {
   font-size: 26px;
@@ -75,6 +88,8 @@
   font-size: 14px;
 }
 
+/* Form */
+
 .login-form {
   padding: 28px 40px 0;
   display: flex;
@@ -92,6 +107,8 @@
   font-size: 14px;
   font-weight: 600;
 }
+
+/* Fields */
 
 .login-field {
   display: flex;
@@ -116,12 +133,29 @@
   font-family: inherit;
   font-size: 15px;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.login-input::placeholder { color: #8a8a8a; }
-.login-input:hover { border-color: #717171; }
-.login-input:focus { border-color: #222222; box-shadow: 0 0 0 1px #222222; }
+.login-input::placeholder {
+  color: #8a8a8a;
+}
+
+.login-input:hover {
+  border-color: #717171;
+}
+
+.login-input:focus {
+  border-color: #222222;
+  box-shadow: 0 0 0 1px #222222;
+}
+
+.login-input:focus-visible {
+  outline: none;
+}
+
+/* Forgot password */
 
 .login-forgot {
   display: block;
@@ -132,7 +166,11 @@
   text-decoration: underline;
 }
 
-.login-forgot:hover { color: #b00050; }
+.login-forgot:hover {
+  color: #b00050;
+}
+
+/* Role selector */
 
 .login-role-grid {
   display: grid;
@@ -152,17 +190,28 @@
   background: #ffffff;
   cursor: pointer;
   text-align: center;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
 }
 
-.login-role-option:hover { border-color: #717171; background: #fafafa; }
-.login-role-option--active { border-color: #ff385c; background: #fff5f6; }
+.login-role-option:hover {
+  border-color: #717171;
+  background: #fafafa;
+}
+
+.login-role-option--active {
+  border-color: #ff385c;
+  background: #fff5f6;
+}
 
 .login-role-text {
   color: #222222;
   font-size: 14px;
   font-weight: 600;
 }
+
+/* Submit */
 
 .login-submit {
   width: 100%;
@@ -175,12 +224,25 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.1s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.1s ease;
 }
 
-.login-submit:hover:not(:disabled) { opacity: 0.92; }
-.login-submit:active:not(:disabled) { transform: scale(0.99); }
-.login-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.login-submit:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.login-submit:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.login-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Host switch */
 
 .login-switch-site {
   margin: 24px 40px 0;
@@ -212,10 +274,17 @@
   font-size: 14px;
   font-weight: 700;
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
-.login-host-link:hover { background: #ff385c; color: #ffffff; }
+.login-host-link:hover {
+  background: #ff385c;
+  color: #ffffff;
+}
+
+/* Divider */
 
 .login-divider {
   display: flex;
@@ -233,6 +302,8 @@
   height: 1px;
   background: #dddddd;
 }
+
+/* Sign-up / login toggle */
 
 .login-toggle {
   margin: 0;
@@ -254,7 +325,11 @@
   cursor: pointer;
 }
 
-.login-toggle-btn:hover { color: #d70466; }
+.login-toggle-btn:hover {
+  color: #d70466;
+}
+
+/* Accessibility */
 
 .sr-only {
   position: absolute;
@@ -268,12 +343,39 @@
   border: 0;
 }
 
+/* Responsive */
+
 @media (max-width: 540px) {
-  .login-page { padding: 70px 16px 24px; }
-  .login-back { top: 18px; left: 16px; }
-  .login-card__header { padding: 30px 24px 24px; }
-  .login-form { padding-left: 24px; padding-right: 24px; }
-  .login-switch-site { margin-left: 24px; margin-right: 24px; }
-  .login-divider { padding-left: 24px; padding-right: 24px; }
-  .login-toggle { padding-left: 24px; padding-right: 24px; }
+  .login-page {
+    padding: 70px 16px 24px;
+  }
+
+  .login-back {
+    top: 18px;
+    left: 16px;
+  }
+
+  .login-card__header {
+    padding: 30px 24px 24px;
+  }
+
+  .login-form {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .login-switch-site {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+
+  .login-divider {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .login-toggle {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
 }

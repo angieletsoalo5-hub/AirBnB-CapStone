@@ -8,6 +8,7 @@
   flex-direction: column;
 }
 
+/* ── Section helpers ── */
 .section {
   padding-top: 40px;
   padding-bottom: 40px;
@@ -20,41 +21,58 @@
   margin-bottom: 20px;
 }
 
-/* ════ 1. Hero ════ */
+/* ════════════════════════════════════════
+   1. Hero
+   The dark header/search area sits above the
+   image, matching the original hero layout.
+════════════════════════════════════════ */
 .hero {
   position: relative;
-  height: 100vh;
+  height: min(90vh, 900px);
   min-height: 560px;
   max-height: 960px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  background: #000;
 }
 
 .hero-bg {
-  position: absolute;
-  inset: 0;
+  position: relative;
   z-index: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .hero-image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 30%;
+  object-position: center 54%;
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.04) 30%, rgba(0,0,0,0.08) 60%, rgba(0,0,0,0.52) 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.28) 0%,
+    rgba(0, 0, 0, 0.04) 30%,
+    rgba(0, 0, 0, 0.08) 60%,
+    rgba(0, 0, 0, 0.52) 100%
+  );
 }
 
+/* Tagline + "I'm flexible" button, centred over the image */
 .hero-content {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 0 24px 80px;
+  padding: 0 24px 64px;
   margin-top: auto;
 }
 
@@ -63,11 +81,11 @@
   font-size: var(--font-size-2xl);
   font-weight: 700;
   margin-bottom: 20px;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.45);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 }
 
 .hero-flexible-btn {
-  background: rgba(255,255,255,0.92);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--color-text);
   font-weight: 700;
   font-size: var(--font-size-md);
@@ -83,7 +101,11 @@
   transform: scale(1.03);
 }
 
-/* ════ 2. Inspiration Cards ════ */
+/* ════════════════════════════════════════
+   2. Inspiration Cards
+   4-col grid, image top + coloured band bottom
+   Matches Figma: hotel name large, distance small
+════════════════════════════════════════ */
 .inspiration-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -125,6 +147,7 @@
   transform: scale(1.05);
 }
 
+/* Coloured band: hotel name + distance */
 .inspiration-card__body {
   padding: 14px 14px 18px;
   color: #fff;
@@ -139,11 +162,15 @@
 
 .inspiration-card__time {
   font-size: var(--font-size-xs);
-  color: rgba(255,255,255,0.88);
+  color: rgba(255, 255, 255, 0.88);
   margin-top: 4px;
 }
 
-/* ════ 3. Experiences ════ */
+/* ════════════════════════════════════════
+   3. Discover Experiences
+   Two side-by-side tall cards with image background,
+   title + small white pill button at bottom-left
+════════════════════════════════════════ */
 .experiences-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -161,15 +188,18 @@
   transition: transform var(--transition-base);
 }
 
+/* dark-to-transparent gradient from bottom */
 .experience-card::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 55%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 55%);
   pointer-events: none;
 }
 
-.experience-card:hover { transform: scale(1.01); }
+.experience-card:hover {
+  transform: scale(1.01);
+}
 
 .experience-card__body {
   position: absolute;
@@ -185,10 +215,11 @@
   font-weight: 800;
   color: #fff;
   margin-bottom: 14px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
 }
 
+/* Small white pill button — "Experiences" / "Online Experiences" */
 .experience-card__btn {
   display: inline-flex;
   align-items: center;
@@ -203,9 +234,15 @@
   transition: background var(--transition-fast);
 }
 
-.experience-card__btn:hover { background: #f0f0f0; }
+.experience-card__btn:hover {
+  background: #f0f0f0;
+}
 
-/* ════ 4. Gift Cards ════ */
+/* ════════════════════════════════════════
+   4. Shop Airbnb Gift Cards
+   White background, left = title + "Learn more" black btn,
+   right = three fanned gift card visuals
+════════════════════════════════════════ */
 .shop-card {
   display: flex;
   align-items: center;
@@ -236,8 +273,11 @@
   color: #fff;
 }
 
-.shop-card__btn:hover { background: #444; }
+.shop-card__btn:hover {
+  background: #444;
+}
 
+/* Fanned gift card stack */
 .shop-card__cards-wrap {
   flex: 1;
   display: flex;
@@ -256,17 +296,47 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   overflow: hidden;
 }
 
-.gift-card--back { background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%); right: 20px; top: 10px; transform: rotate(8deg); z-index: 1; }
-.gift-card--mid { background: linear-gradient(135deg, #f472b6 0%, #e31c5f 100%); right: 80px; top: 0; transform: rotate(-4deg); z-index: 2; }
-.gift-card--front { background: linear-gradient(135deg, #ff5a5f 0%, #c13584 100%); right: 140px; top: 20px; transform: rotate(2deg); z-index: 3; }
+/* Back card: landscape lavender/purple */
+.gift-card--back {
+  background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+  right: 20px;
+  top: 10px;
+  transform: rotate(8deg);
+  z-index: 1;
+}
 
-.gift-card__logo { width: 40px; height: 40px; }
+/* Middle card: pink/coral */
+.gift-card--mid {
+  background: linear-gradient(135deg, #f472b6 0%, #e31c5f 100%);
+  right: 80px;
+  top: 0;
+  transform: rotate(-4deg);
+  z-index: 2;
+}
 
-/* ════ 5. Hosting Banner ════ */
+/* Front card: pink (closest to viewer) */
+.gift-card--front {
+  background: linear-gradient(135deg, #ff5a5f 0%, #c13584 100%);
+  right: 140px;
+  top: 20px;
+  transform: rotate(2deg);
+  z-index: 3;
+}
+
+.gift-card__logo {
+  width: 40px;
+  height: 40px;
+}
+
+/* ════════════════════════════════════════
+   5. Hosting Banner
+   Same width as .container sections, rounded corners,
+   left/right padding matches page gutter
+════════════════════════════════════════ */
 .hosting-banner-wrap {
   width: 100%;
   max-width: var(--max-width);
@@ -285,7 +355,11 @@
   align-items: flex-end;
 }
 
-.hosting-banner__bg { position: absolute; inset: 0; z-index: 0; }
+.hosting-banner__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
 
 .hosting-banner__img {
   width: 100%;
@@ -297,10 +371,19 @@
 .hosting-banner__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.08) 100%);
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.25) 60%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
 }
 
-.hosting-banner__content { position: relative; z-index: 1; padding: 48px; }
+.hosting-banner__content {
+  position: relative;
+  z-index: 1;
+  padding: 48px;
+}
 
 .hosting-banner__title {
   font-size: 48px;
@@ -308,11 +391,11 @@
   line-height: 1.05;
   color: #fff;
   margin-bottom: 24px;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
 }
 
 .hosting-banner__btn {
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   color: var(--color-text);
   font-size: var(--font-size-sm);
   font-weight: 700;
@@ -323,11 +406,21 @@
   transition: background var(--transition-fast);
 }
 
-.hosting-banner__btn:hover { background: #fff; }
+.hosting-banner__btn:hover {
+  background: #fff;
+}
 
-/* ════ 6. Future Getaways ════ */
-.getaways-section { padding-top: 32px; padding-bottom: 32px; }
+/* ════════════════════════════════════════
+   6. Future Getaways
+   Tabs with underline active state +
+   plain 4-col text destination grid (no images, no border)
+════════════════════════════════════════ */
+.getaways-section {
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
 
+/* Tab bar */
 .getaways-tabs {
   display: flex;
   gap: 0;
@@ -337,7 +430,9 @@
   scrollbar-width: none;
 }
 
-.getaways-tabs::-webkit-scrollbar { display: none; }
+.getaways-tabs::-webkit-scrollbar {
+  display: none;
+}
 
 .getaways-tab {
   background: none;
@@ -354,8 +449,13 @@
   font-family: inherit;
 }
 
-.getaways-tab:first-child { padding-left: 0; }
-.getaways-tab:hover { color: var(--color-text); }
+.getaways-tab:first-child {
+  padding-left: 0;
+}
+
+.getaways-tab:hover {
+  color: var(--color-text);
+}
 
 .getaways-tab--active {
   color: var(--color-text);
@@ -363,6 +463,7 @@
   border-bottom-color: var(--color-text);
 }
 
+/* 4-col text grid */
 .getaways-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -388,47 +489,118 @@
   color: var(--color-text);
 }
 
-.getaway-link:hover .getaway-link__city { text-decoration: underline; }
-.getaway-link__city--underline { text-decoration: underline; }
+.getaway-link:hover .getaway-link__city {
+  text-decoration: underline;
+}
+
+.getaway-link__city--underline {
+  text-decoration: underline;
+}
 
 .getaway-link__country {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
-/* ════ Responsive ════ */
+/* ════════════════════════════════════════
+   Responsive
+════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .inspiration-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .getaways-grid { grid-template-columns: repeat(3, 1fr); }
-  .shop-card__cards-wrap { min-width: 260px; }
+  .inspiration-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .getaways-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .shop-card__cards-wrap {
+    min-width: 260px;
+  }
 }
 
 @media (max-width: 860px) {
-  .inspiration-grid { grid-template-columns: repeat(2, 1fr); }
-  .getaways-grid { grid-template-columns: repeat(2, 1fr); }
-  .hosting-banner__title { font-size: 36px; }
-  .hosting-banner { min-height: 340px; }
+  .inspiration-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .getaways-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hosting-banner__title {
+    font-size: 36px;
+  }
+
+  .hosting-banner {
+    min-height: 340px;
+  }
 }
 
 @media (max-width: 768px) {
-  .hero { height: 75vh; }
-  .hero-tagline { font-size: var(--font-size-xl); }
-  .experiences-grid { grid-template-columns: 1fr; }
-  .experience-card { height: 260px; }
-  .shop-card { flex-direction: column; gap: 24px; align-items: flex-start; }
-  .shop-card__cards-wrap { width: 100%; justify-content: center; }
+  .hero {
+    height: 75vh;
+    min-height: 520px;
+  }
+
+  .hero-tagline {
+    font-size: var(--font-size-xl);
+  }
+
+  .experiences-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .experience-card {
+    height: 260px;
+  }
+
+  .shop-card {
+    flex-direction: column;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .shop-card__cards-wrap {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 600px) {
-  .inspiration-grid { grid-template-columns: repeat(2, 1fr); }
-  .section-title { font-size: var(--font-size-lg); }
-  .getaways-section { padding-top: 20px; padding-bottom: 20px; }
-  .hosting-banner__title { font-size: 28px; }
-  .hosting-banner { min-height: 300px; }
-  .hosting-banner__content { padding: 32px 28px; }
-  .hosting-banner-wrap { padding: 0 20px 32px; }
+  .inspiration-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .section-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .getaways-section {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .hosting-banner__title {
+    font-size: 28px;
+  }
+
+  .hosting-banner {
+    min-height: 300px;
+  }
+
+  .hosting-banner__content {
+    padding: 32px 28px;
+  }
+
+  .hosting-banner-wrap {
+    padding: 0 20px 32px;
+  }
 }
 
 @media (max-width: 420px) {
-  .getaways-grid { grid-template-columns: 1fr; }
+  .getaways-grid {
+    grid-template-columns: 1fr;
+  }
 }

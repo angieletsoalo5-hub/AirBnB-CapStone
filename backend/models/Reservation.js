@@ -43,11 +43,10 @@ const reservationSchema = new mongoose.Schema(
 );
 
 // Guard against nonsensical date ranges at the schema level.
-reservationSchema.pre('validate', function checkDates(next) {
+reservationSchema.pre('validate', function checkDates() {
   if (this.checkIn && this.checkOut && this.checkOut <= this.checkIn) {
-    return next(new Error('checkOut must be after checkIn'));
+    throw new Error('checkOut must be after checkIn');
   }
-  next();
 });
 
 module.exports = mongoose.model('Reservation', reservationSchema);

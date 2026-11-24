@@ -1,3 +1,9 @@
+/**
+ * Reservations page – shows the logged-in user's bookings
+ * as cards with property image, dates, cost and a cancel button.
+ * Redirects to /login if not authenticated.
+ */
+
 import { useEffect, useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -8,10 +14,16 @@ import './Reservations.css';
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&q=80';
 
-function fmt(n) { return Number(n || 0).toLocaleString('en-ZA'); }
+function fmt(n) {
+  return Number(n || 0).toLocaleString('en-ZA');
+}
 
 function fmtDate(iso) {
-  return new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-ZA', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 function nightsBetween(checkIn, checkOut) {
@@ -48,7 +60,10 @@ export default function Reservations() {
     }
   }
 
-  if (!authLoading && !user) return <Navigate to="/login" replace />;
+  // Redirect if not logged in
+  if (!authLoading && !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="reservations-page">
@@ -57,6 +72,7 @@ export default function Reservations() {
       <main className="container reservations-main">
         <h1 className="reservations-title">My Trips</h1>
 
+        {/* Loading */}
         {loading && (
           <div className="reservations-status" aria-live="polite">
             <div className="spinner" aria-hidden="true" />
@@ -64,21 +80,28 @@ export default function Reservations() {
           </div>
         )}
 
+        {/* Error */}
         {!loading && error && (
           <div className="reservations-status reservations-status--error" role="alert">
             <p>{error}</p>
           </div>
         )}
 
+        {/* Empty */}
         {!loading && !error && reservations.length === 0 && (
           <div className="reservations-empty">
             <div className="reservations-empty__icon" aria-hidden="true"></div>
             <h2 className="reservations-empty__title">No trips booked…yet!</h2>
-            <p className="reservations-empty__subtitle">Time to dust off your bags and start planning your next adventure.</p>
-            <Link to="/locations" className="btn btn-dark reservations-empty__btn">Start searching</Link>
+            <p className="reservations-empty__subtitle">
+              Time to dust off your bags and start planning your next adventure.
+            </p>
+            <Link to="/locations" className="btn btn-dark reservations-empty__btn">
+              Start searching
+            </Link>
           </div>
         )}
 
+        {/* Reservation cards */}
         {!loading && !error && reservations.length > 0 && (
           <div className="reservations-grid" aria-label="Your reservations">
             {reservations.map((r) => {
@@ -89,14 +112,29 @@ export default function Reservations() {
 
               return (
                 <article key={r._id} className="reservation-card">
-                  <Link to={acc?._id ? `/locations/${acc._id}` : '#'} className="reservation-card__img-link" tabIndex={-1} aria-hidden="true">
-                    <img src={image} alt={acc?.title ?? 'Property'} className="reservation-card__img" loading="lazy" />
+                  {/* Image */}
+                  <Link
+                    to={acc?._id ? `/locations/${acc._id}` : '#'}
+                    className="reservation-card__img-link"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  >
+                    <img
+                      src={image}
+                      alt={acc?.title ?? 'Property'}
+                      className="reservation-card__img"
+                      loading="lazy"
+                    />
                   </Link>
 
+                  {/* Body */}
                   <div className="reservation-card__body">
                     <p className="reservation-card__location">{acc?.location ?? '—'}</p>
                     <h3 className="reservation-card__title">
-                      <Link to={acc?._id ? `/locations/${acc._id}` : '#'} className="reservation-card__title-link">
+                      <Link
+                        to={acc?._id ? `/locations/${acc._id}` : '#'}
+                        className="reservation-card__title-link"
+                      >
                         {acc?.title ?? 'Listing no longer available'}
                       </Link>
                     </h3>
@@ -115,10 +153,20 @@ export default function Reservations() {
 
                     <div className="reservation-card__footer">
                       <div className="reservation-card__cost">
-                        {nights > 0 && <p className="reservation-card__nights">{nights} night{nights !== 1 ? 's' : ''}</p>}
-                        {total != null && <p className="reservation-card__total">Total: <strong>R{fmt(total)}</strong></p>}
+                        {nights > 0 && (
+                          <p className="reservation-card__nights">{nights} night{nights !== 1 ? 's' : ''}</p>
+                        )}
+                        {total != null && (
+                          <p className="reservation-card__total">Total: <strong>R{fmt(total)}</strong></p>
+                        )}
                       </div>
-                      <button className="btn btn-outline reservation-card__cancel" onClick={() => handleCancel(r._id)} disabled={cancellingId === r._id} aria-busy={cancellingId === r._id}>
+
+                      <button
+                        className="btn btn-outline reservation-card__cancel"
+                        onClick={() => handleCancel(r._id)}
+                        disabled={cancellingId === r._id}
+                        aria-busy={cancellingId === r._id}
+                      >
                         {cancellingId === r._id ? 'Cancelling…' : 'Cancel'}
                       </button>
                     </div>

@@ -5,8 +5,8 @@
  *
  * HERO mode (home page, `transparent` prop):
  *   - Sits on top of the hero image with a transparent/dark background
- *   - Row 1: logo | nav tabs | Become a host + profile
- *   - Row 2: Search pill with Where | Check in | Check out | Guests | Search btn
+ *   - Row 1: logo | nav tabs (Places to stay / Experiences / Online Experiences) | Become a host + profile
+ *   - Row 2: Search pill with Where (hotel dropdown) | Check in | Check out | Guests | Search btn
  *
  * STANDARD mode (all other pages):
  *   - White background with border-bottom
@@ -18,6 +18,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Header.css';
 
+// ── Airbnb logo SVG ──────────────────────────────────────────
 function AirbnbLogo({ white }) {
   return (
     <svg
@@ -31,6 +32,7 @@ function AirbnbLogo({ white }) {
   );
 }
 
+// ── Hotel type options for the "Where" dropdown ──────────────
 const HOTEL_TYPES = [
   { value: '', label: 'Anywhere' },
   { value: 'New York', label: 'New York' },
@@ -56,14 +58,15 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174';
   const dropdownRef = useRef(null);
   const languageRef = useRef(null);
 
+  // Profile dropdown
   const [menuOpen, setMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const [language, setLanguage] = useState(LANGUAGES[0]);
 
+  // Hero search state
   const [activeTab, setActiveTab] = useState('Places to stay');
   const [whereOpen, setWhereOpen] = useState(false);
   const [whereValue, setWhereValue] = useState('');
@@ -73,6 +76,7 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
   const [children, setChildren] = useState(0);
   const whereRef = useRef(null);
 
+  // Compact search (standard header)
   const [locationInput, setLocationInput] = useState(defaultLocation);
   const [datesOpen, setDatesOpen] = useState(false);
   const [guestsOpen, setGuestsOpen] = useState(false);
@@ -80,17 +84,26 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
   const guestsRef = useRef(null);
   const compactSearchRef = useRef(null);
 
-  const [searchExpanded, setSearchExpanded] = useState(Boolean(defaultLocation));
+  // Collapsed "Start your search" pill vs. expanded segmented pill —
+  // starts collapsed unless the page already has an active location/date/guest filter
+  const [searchExpanded, setSearchExpanded] = useState(
+    Boolean(defaultLocation)
+  );
 
+  // Today string for date min
   const today = new Date().toISOString().split('T')[0];
 
+  // Keep the compact search location in sync with the page's active filter
   useEffect(() => {
     setLocationInput(defaultLocation);
   }, [defaultLocation]);
 
+  // Close profile dropdown on outside click
   useEffect(() => {
     function handleOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setMenuOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);
@@ -104,14 +117,18 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
     return () => document.removeEventListener('mousedown', handleOutside);
   }, []);
 
+  // Close where dropdown on outside click
   useEffect(() => {
     function handleOutside(e) {
-      if (whereRef.current && !whereRef.current.contains(e.target)) setWhereOpen(false);
+      if (whereRef.current && !whereRef.current.contains(e.target)) {
+        setWhereOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);
   }, []);
 
+  // Close compact dates / guests popovers on outside click
   useEffect(() => {
     function handleOutside(e) {
       if (datesRef.current && !datesRef.current.contains(e.target)) setDatesOpen(false);
@@ -121,6 +138,8 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
     return () => document.removeEventListener('mousedown', handleOutside);
   }, []);
 
+  // Collapse the compact search back down to the plain "Start your search"
+  // pill when clicking away with nothing entered (matches Figma default state)
   useEffect(() => {
     function handleOutside(e) {
       if (compactSearchRef.current && !compactSearchRef.current.contains(e.target)) {
@@ -133,12 +152,14 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
     return () => document.removeEventListener('mousedown', handleOutside);
   }, [locationInput, checkIn, checkOut, adults, children]);
 
+  // Format a yyyy-mm-dd string as "Feb 19"
   function formatShortDate(value) {
     if (!value) return '';
     const d = new Date(`${value}T00:00:00`);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
+  // Build the compact "Feb 19-26" style label for the dates segment
   const datesLabel = (() => {
     if (!checkIn && !checkOut) return 'Add dates';
     if (checkIn && !checkOut) return `${formatShortDate(checkIn)} –`;
@@ -168,9 +189,9 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
       <div className="guest-picker-row" key={label}>
         <span><strong>{label}</strong><small>{description}</small></span>
         <div className="hero-guest-counter">
-          <button type="button" className="hero-guest-btn" onClick={() => setCount((v) => Math.max(min, v - 1))} aria-label={`Remove ${label.toLowerCase()}`} disabled={count <= min}>−</button>
+          <button type="button" className="hero-guest-btn" onClick={() => setCount((value) => Math.max(min, value - 1))} aria-label={`Remove ${label.toLowerCase()}`} disabled={count <= min}>−</button>
           <span className="hero-guest-count" aria-live="polite">{count}</span>
-          <button type="button" className="hero-guest-btn" onClick={() => setCount((v) => Math.min(16, v + 1))} aria-label={`Add ${label.toLowerCase()}`} disabled={count >= 16}>+</button>
+          <button type="button" className="hero-guest-btn" onClick={() => setCount((value) => Math.min(16, value + 1))} aria-label={`Add ${label.toLowerCase()}`} disabled={count >= 16}>+</button>
         </div>
       </div>
     ));
@@ -204,6 +225,7 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
     <header className={`site-header${transparent ? ' site-header--transparent' : ''}`}>
       <div className="header-inner">
 
+        {/* ── Logo ── */}
         <Link to="/" className="header-logo" aria-label="Airbnb home">
           <AirbnbLogo white={isWhite} />
           <span className="header-logo-text" style={{ color: isWhite ? '#fff' : 'var(--color-primary)' }}>
@@ -211,19 +233,24 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
           </span>
         </Link>
 
+        {/* ── Centre: nav tabs (transparent) OR compact search (standard) ── */}
         {transparent ? (
           <nav className="header-nav-tabs" aria-label="Main navigation">
             {NAV_TABS.map((tab) => (
               <button
                 key={tab}
                 className={`header-nav-tab${activeTab === tab ? ' header-nav-tab--active' : ''}`}
-                onClick={() => { setActiveTab(tab); navigate('/locations'); }}
+                onClick={() => {
+                  setActiveTab(tab);
+                  navigate('/locations');
+                }}
               >
                 {tab}
               </button>
             ))}
           </nav>
         ) : !searchExpanded ? (
+          /* ── Collapsed pill: matches the Figma "Start your search" default state ── */
           <div className="header-search" ref={compactSearchRef}>
             <button
               type="button"
@@ -244,7 +271,12 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
         ) : (
           <form className="header-search" onSubmit={handleCompactSearch} role="search" ref={compactSearchRef}>
             <div className="search-pill search-pill--summary">
-              <button type="button" className="search-seg search-seg--location" onClick={() => document.getElementById('header-search-input')?.focus()}>
+              {/* WHERE — plain-text destination segment */}
+              <button
+                type="button"
+                className="search-seg search-seg--location"
+                onClick={() => document.getElementById('header-search-input')?.focus()}
+              >
                 <input
                   id="header-search-input"
                   type="text"
@@ -258,19 +290,36 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
 
               <span className="search-divider" aria-hidden="true" />
 
+              {/* DATES — merged check-in / check-out summary */}
               <div className="search-seg search-seg--dates" ref={datesRef}>
-                <button type="button" className="search-seg-btn" onClick={() => { setDatesOpen((o) => !o); setGuestsOpen(false); }} aria-expanded={datesOpen} aria-haspopup="dialog">
+                <button
+                  type="button"
+                  className="search-seg-btn"
+                  onClick={() => { setDatesOpen((o) => !o); setGuestsOpen(false); }}
+                  aria-expanded={datesOpen}
+                  aria-haspopup="dialog"
+                >
                   {datesLabel}
                 </button>
                 {datesOpen && (
                   <div className="search-popover search-popover--dates" role="dialog" aria-label="Select dates">
                     <label className="search-popover-field">
                       <span>Check in</span>
-                      <input type="date" value={checkIn} min={today} onChange={(e) => { setCheckIn(e.target.value); if (checkOut && e.target.value >= checkOut) setCheckOut(''); }} />
+                      <input
+                        type="date"
+                        value={checkIn}
+                        min={today}
+                        onChange={(e) => { setCheckIn(e.target.value); if (checkOut && e.target.value >= checkOut) setCheckOut(''); }}
+                      />
                     </label>
                     <label className="search-popover-field">
                       <span>Check out</span>
-                      <input type="date" value={checkOut} min={checkIn || today} onChange={(e) => setCheckOut(e.target.value)} />
+                      <input
+                        type="date"
+                        value={checkOut}
+                        min={checkIn || today}
+                        onChange={(e) => setCheckOut(e.target.value)}
+                      />
                     </label>
                   </div>
                 )}
@@ -278,8 +327,15 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
 
               <span className="search-divider" aria-hidden="true" />
 
+              {/* GUESTS — plain-text summary with stepper popover */}
               <div className="search-seg search-seg--guests" ref={guestsRef}>
-                <button type="button" className="search-seg-btn" onClick={() => { setGuestsOpen((o) => !o); setDatesOpen(false); }} aria-expanded={guestsOpen} aria-haspopup="dialog">
+                <button
+                  type="button"
+                  className="search-seg-btn"
+                  onClick={() => { setGuestsOpen((o) => !o); setDatesOpen(false); }}
+                  aria-expanded={guestsOpen}
+                  aria-haspopup="dialog"
+                >
                   {guestsLabel}
                 </button>
                 {guestsOpen && (
@@ -298,11 +354,16 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
           </form>
         )}
 
+        {/* ── Right: Become a host + profile ── */}
         <nav className="header-right" aria-label="User navigation">
           {!user && (
-            <a href={`${ADMIN_URL}/login`} className={`header-host-link${isWhite ? ' header-host-link--white' : ''}`}>
+            <Link
+              to="/admin/login"
+              className={`header-host-link${isWhite ? ' header-host-link--white' : ''}`}
+            >
               Become a host
-            </a>
+            </Link>
+
           )}
           {user && (
             <span className={`header-welcome${isWhite ? ' header-welcome--white' : ''}`}>
@@ -311,9 +372,15 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
           )}
 
           <div className="header-language" ref={languageRef}>
-            <button type="button" className={`header-globe${isWhite ? ' header-globe--white' : ''}`} onClick={() => setLanguageOpen((o) => !o)} aria-label={`Change language, currently ${language}`} aria-expanded={languageOpen} aria-haspopup="menu" title="Change language">
-              <GlobeIcon />
-            </button>
+            <button
+              type="button"
+              className={`header-globe${isWhite ? ' header-globe--white' : ''}`}
+              onClick={() => setLanguageOpen((open) => !open)}
+              aria-label={`Change language, currently ${language}`}
+              aria-expanded={languageOpen}
+              aria-haspopup="menu"
+              title="Change language"
+            ><GlobeIcon /></button>
             {languageOpen && (
               <div className="language-menu" role="menu" aria-label="Choose a language">
                 {LANGUAGES.map((option) => (
@@ -326,7 +393,13 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
           </div>
 
           <div className="header-profile" ref={dropdownRef}>
-            <button className={`header-profile-btn${isWhite ? ' header-profile-btn--white' : ''}`} onClick={() => setMenuOpen((o) => !o)} aria-expanded={menuOpen} aria-haspopup="menu" aria-label="Open user menu">
+            <button
+              className={`header-profile-btn${isWhite ? ' header-profile-btn--white' : ''}`}
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+              aria-label="Open user menu"
+            >
               <svg className="header-hamburger" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
                 <rect x="6" y="10" width="20" height="2" rx="1" fill="currentColor" />
                 <rect x="6" y="15" width="20" height="2" rx="1" fill="currentColor" />
@@ -349,6 +422,11 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
                       Signed in as <strong>{user.username}</strong>
                     </span>
                     <hr className="dropdown-divider" />
+                    {user.role === 'host' && (
+                      <Link to="/admin" className="dropdown-item" role="menuitem" onClick={() => setMenuOpen(false)}>
+                        Host dashboard
+                      </Link>
+                    )}
                     <Link to="/reservations" className="dropdown-item" role="menuitem" onClick={() => setMenuOpen(false)}>
                       View reservations
                     </Link>
@@ -361,7 +439,7 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
                     <Link to="/login" className="dropdown-item dropdown-item--bold" role="menuitem" onClick={() => setMenuOpen(false)}>Log in</Link>
                     <Link to="/login" className="dropdown-item" role="menuitem" onClick={() => setMenuOpen(false)}>Sign up</Link>
                     <hr className="dropdown-divider" />
-                    <a href={`${ADMIN_URL}/login`} className="dropdown-item" role="menuitem" onClick={() => setMenuOpen(false)}>Airbnb your home</a>
+                    <Link to="/admin/login" className="dropdown-item" role="menuitem" onClick={() => setMenuOpen(false)}>Airbnb your home</Link>
                     <Link to="/login" className="dropdown-item" role="menuitem" onClick={() => setMenuOpen(false)}>Help Centre</Link>
                   </>
                 )}
@@ -371,13 +449,21 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
         </nav>
       </div>
 
+      {/* ── Hero search bar (transparent mode only) ── */}
       {transparent && (
         <div className="header-hero-search-wrap">
           <form className="header-hero-search" onSubmit={handleHeroSearch} role="search" aria-label="Search accommodations">
             <div className="hero-search-pill">
 
+              {/* WHERE — dropdown */}
               <div className="hero-segment hero-segment--where" ref={whereRef}>
-                <button type="button" className="hero-segment-btn" onClick={() => setWhereOpen((o) => !o)} aria-expanded={whereOpen} aria-haspopup="listbox">
+                <button
+                  type="button"
+                  className="hero-segment-btn"
+                  onClick={() => setWhereOpen((o) => !o)}
+                  aria-expanded={whereOpen}
+                  aria-haspopup="listbox"
+                >
                   <span className="hero-segment-label">Where</span>
                   <span className="hero-segment-value">
                     {HOTEL_TYPES.find((t) => t.value === whereValue)?.label || 'Search destinations'}
@@ -386,7 +472,15 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
                 {whereOpen && (
                   <ul className="hero-where-dropdown" role="listbox" aria-label="Destination options">
                     {HOTEL_TYPES.map((opt) => (
-                      <li key={opt.value} role="option" aria-selected={whereValue === opt.value} className={`hero-where-option${whereValue === opt.value ? ' hero-where-option--active' : ''}`} onClick={() => { setWhereValue(opt.value); setWhereOpen(false); }} onKeyDown={(e) => e.key === 'Enter' && (setWhereValue(opt.value), setWhereOpen(false))} tabIndex={0}>
+                      <li
+                        key={opt.value}
+                        role="option"
+                        aria-selected={whereValue === opt.value}
+                        className={`hero-where-option${whereValue === opt.value ? ' hero-where-option--active' : ''}`}
+                        onClick={() => { setWhereValue(opt.value); setWhereOpen(false); }}
+                        onKeyDown={(e) => e.key === 'Enter' && (setWhereValue(opt.value), setWhereOpen(false))}
+                        tabIndex={0}
+                      >
                         {opt.label}
                       </li>
                     ))}
@@ -396,28 +490,51 @@ export default function Header({ onFilter, transparent = false, defaultLocation 
 
               <span className="hero-divider" aria-hidden="true" />
 
+              {/* CHECK IN */}
               <div className="hero-segment hero-segment--date">
                 <label className="hero-segment-label" htmlFor="hero-checkin">Check in</label>
-                <input id="hero-checkin" type="date" className="hero-segment-input" value={checkIn} min={today} onChange={(e) => { setCheckIn(e.target.value); if (checkOut && e.target.value >= checkOut) setCheckOut(''); }} aria-label="Check-in date" />
+                <input
+                  id="hero-checkin"
+                  type="date"
+                  className="hero-segment-input"
+                  value={checkIn}
+                  min={today}
+                  onChange={(e) => {
+                    setCheckIn(e.target.value);
+                    if (checkOut && e.target.value >= checkOut) setCheckOut('');
+                  }}
+                  aria-label="Check-in date"
+                />
               </div>
 
               <span className="hero-divider" aria-hidden="true" />
 
+              {/* CHECK OUT */}
               <div className="hero-segment hero-segment--date">
                 <label className="hero-segment-label" htmlFor="hero-checkout">Check out</label>
-                <input id="hero-checkout" type="date" className="hero-segment-input" value={checkOut} min={checkIn || today} onChange={(e) => setCheckOut(e.target.value)} aria-label="Check-out date" />
+                <input
+                  id="hero-checkout"
+                  type="date"
+                  className="hero-segment-input"
+                  value={checkOut}
+                  min={checkIn || today}
+                  onChange={(e) => setCheckOut(e.target.value)}
+                  aria-label="Check-out date"
+                />
               </div>
 
               <span className="hero-divider" aria-hidden="true" />
 
+              {/* GUESTS */}
               <div className="hero-segment hero-segment--guests" ref={guestsRef}>
-                <button type="button" className="hero-segment-btn" onClick={() => setGuestsOpen((o) => !o)} aria-expanded={guestsOpen} aria-haspopup="dialog">
+                <button type="button" className="hero-segment-btn" onClick={() => setGuestsOpen((open) => !open)} aria-expanded={guestsOpen} aria-haspopup="dialog">
                   <span className="hero-segment-label">Guests</span>
                   <span className="hero-segment-value">{guestsLabel}</span>
                 </button>
                 {guestsOpen && <div className="hero-guests-dropdown" role="dialog" aria-label="Select guests">{renderGuestRows()}</div>}
               </div>
 
+              {/* SEARCH BUTTON */}
               <button type="submit" className="hero-search-btn" aria-label="Search">
                 <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
                   <path d="M13 24a11 11 0 1 1 0-22 11 11 0 0 1 0 22zm16.293 3.293-5.647-5.647a13 13 0 1 0-1.414 1.414l5.647 5.647a1 1 0 0 0 1.414-1.414z" fill="currentColor" />

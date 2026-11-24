@@ -1,0 +1,1116 @@
+/* ============================================================
+   LocationDetails – single listing page
+   ============================================================ */
+
+/* ── Status panels ── */
+.details-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 50vh;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+}
+
+.details-status--error {
+  color: #c62828;
+}
+
+/* ── Page wrapper ── */
+.details-page {
+  padding-top: 32px;
+  padding-bottom: 80px;
+}
+
+/* ── Heading ── */
+.details-heading {
+  margin-bottom: 16px;
+}
+
+.details-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.details-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.details-meta-item {
+  color: var(--color-text-muted);
+}
+
+.details-rating {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.details-meta-dot {
+  padding: 0 4px;
+}
+
+.details-underline-link {
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.details-underline-link:hover {
+  color: var(--color-text-muted);
+}
+
+/* ════ Gallery ════ */
+.details-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  height: 340px;
+  margin-bottom: 40px;
+}
+
+.gallery-main {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  grid-row: 1 / 3;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+}
+
+.gallery-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ════ Two-column body ════ */
+.details-body {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 64px;
+  align-items: start;
+}
+
+/* ── Left column ── */
+.details-main {
+  min-width: 0;
+}
+
+.details-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 32px 0;
+}
+
+.details-host-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 4px;
+}
+
+.details-host-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.details-host-meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.details-host-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Highlight rows */
+.details-highlight {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.details-highlight__title {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  margin-bottom: 2px;
+}
+
+.details-highlight__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Description */
+.details-description {
+  font-size: var(--font-size-base);
+  line-height: 1.65;
+  color: var(--color-text);
+}
+
+.details-empty-text {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Section title */
+.details-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* Amenities */
+.amenities-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.amenity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+.amenity-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--color-text);
+}
+
+.amenity-icon-svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Ratings grid */
+.ratings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 520px;
+}
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rating-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.rating-bar-wrap {
+  flex: 1;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.rating-bar {
+  height: 100%;
+  background: var(--color-text);
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+/* ── Superhost badge ── */
+.superhost-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.superhost-badge__icon {
+  width: 20px;
+  height: 25px;
+  flex-shrink: 0;
+}
+
+/* ── Review cards (side by side, per Figma) ── */
+.reviews-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px 40px;
+  margin-top: 24px;
+}
+
+.review-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.review-card__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.review-card__name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.review-card__date {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.review-card__comment {
+  font-size: var(--font-size-base);
+  line-height: 1.55;
+  color: var(--color-text);
+}
+
+.reviews-show-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 20px;
+  padding: 12px 20px;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text);
+  background: none;
+  border: 1px solid var(--color-text);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.reviews-show-more:hover {
+  background: var(--color-bg-alt);
+}
+
+.rating-val {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Things to know */
+.know-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.know-col__title {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.know-col__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.know-col__list li {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ════ Sticky sidebar calculator ════ */
+.cost-calculator {
+  position: sticky;
+  top: 100px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  box-shadow: var(--shadow-elevated);
+}
+
+.calc-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.calc-price {
+  font-size: var(--font-size-xl);
+}
+
+.calc-price strong {
+  font-weight: 700;
+}
+
+.calc-per-night {
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.calc-rating {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.calc-rating-count {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+/* Date inputs */
+.calc-date-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.calc-date-label {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.calc-date-label:first-child {
+  border-right: 1px solid var(--color-border);
+}
+
+.calc-date-label:hover {
+  background: var(--color-bg-alt);
+}
+
+.calc-date-label span {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.calc-date-input {
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Guests */
+.calc-guests-label {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.calc-guests-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.calc-guests-select {
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Reserve button */
+.calc-reserve-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: var(--font-size-md);
+  border-radius: var(--radius-md);
+  background: linear-gradient(to right, #e61e4d, #e31c5f, #d70466);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: opacity var(--transition-fast);
+}
+
+.calc-reserve-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.calc-reserve-btn:disabled {
+  opacity: 0.6;
+}
+
+/* Feedback */
+.calc-message {
+  font-size: var(--font-size-sm);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.calc-message--success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.calc-message--error {
+  background: #fdecea;
+  color: #c62828;
+}
+
+.calc-no-charge {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Breakdown lines */
+.calc-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.calc-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+.calc-line--discount {
+  color: #2e7d32;
+}
+
+.calc-line--total {
+  font-weight: 700;
+  font-size: var(--font-size-md);
+}
+
+.calc-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 4px 0;
+}
+
+/* ════ Where you'll sleep ════ */
+.sleep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.sleep-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sleep-card__icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.sleep-card__name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.sleep-card__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ════ Responsive ════ */
+@media (max-width: 1024px) {
+  .details-body {
+    grid-template-columns: 1fr 320px;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 860px) {
+  .details-gallery {
+    height: 340px;
+  }
+
+  .details-body {
+    grid-template-columns: 1fr;
+  }
+
+  .cost-calculator {
+    position: static;
+    border-radius: var(--radius-lg);
+  }
+
+  .know-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .details-gallery {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 4px;
+  }
+
+  .gallery-main {
+    height: 260px;
+    grid-row: auto;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    height: 180px;
+  }
+
+  .details-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .amenities-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calc-date-row {
+    grid-template-columns: 1fr;
+  }
+
+  .calc-date-label:first-child {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   Heading actions (Share / Save)
+   ════════════════════════════════════════════════════════════ */
+.details-heading__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.details-heading__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.details-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+
+.details-action-btn:hover {
+  background: var(--color-bg-alt);
+}
+
+/* ════════════════════════════════════════════════════════════
+   Gallery "Show all photos" + lightbox
+   ════════════════════════════════════════════════════════════ */
+.details-gallery {
+  position: relative;
+}
+
+.gallery-show-all-btn {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: #fff;
+  border: 1px solid var(--color-text);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+
+.gallery-show-all-btn:hover {
+  background: var(--color-bg-alt);
+}
+
+.photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: #fff;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.photo-lightbox__close {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 10px;
+  margin-bottom: 16px;
+}
+
+.photo-lightbox__close:hover {
+  text-decoration: underline;
+}
+
+.photo-lightbox__grid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.photo-lightbox__grid img {
+  width: 100%;
+  border-radius: var(--radius-md);
+  display: block;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Where you'll sleep — single photo card
+   ════════════════════════════════════════════════════════════ */
+.sleep-photo-card {
+  max-width: 280px;
+}
+
+.sleep-photo-card__img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  margin-bottom: 12px;
+}
+
+.sleep-photo-card__name {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.sleep-photo-card__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Amenities "Show all" button
+   ════════════════════════════════════════════════════════════ */
+.amenities-show-all-btn {
+  margin-top: 20px;
+  padding: 12px 20px;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text);
+  background: none;
+  border: 1px solid var(--color-text);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.amenities-show-all-btn:hover {
+  background: var(--color-bg-alt);
+}
+
+/* ════════════════════════════════════════════════════════════
+   Calendar (2-month date-range picker)
+   ════════════════════════════════════════════════════════════ */
+.calendar-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: -8px;
+  margin-bottom: 20px;
+}
+
+.calendar-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.calendar-nav {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  font-size: 16px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.calendar-nav:hover {
+  background: var(--color-bg-alt);
+}
+
+.calendar-months {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  min-width: 0;
+}
+
+.cal-month__label {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.cal-weekday {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-weight: 600;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 2px;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  border: none;
+  background: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+}
+
+.cal-day--empty {
+  cursor: default;
+}
+
+.cal-day:not(.cal-day--disabled):not(.cal-day--empty):hover {
+  background: var(--color-bg-alt);
+}
+
+.cal-day--disabled {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cal-day--booked {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.cal-day--in-range {
+  background: var(--color-bg-alt);
+  border-radius: 0;
+}
+
+.cal-day--selected {
+  background: var(--color-text);
+  color: #fff;
+  font-weight: 700;
+}
+
+.calendar-clear-btn {
+  margin-top: 16px;
+  background: none;
+  border: none;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Host card
+   ════════════════════════════════════════════════════════════ */
+.host-card {
+  max-width: 460px;
+}
+
+.host-card__top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.host-card__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.host-card__name {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.host-card__joined {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.host-card__badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.host-card__title {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.host-card__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.host-card__stat {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.host-card__contact-btn {
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.host-card__safety {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  padding: 12px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+/* ════════════════════════════════════════════════════════════
+   Explore other options / Unique stays + breadcrumb
+   ════════════════════════════════════════════════════════════ */
+.explore-section__subtitle {
+  margin-top: 32px;
+}
+
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 20px;
+}
+
+.explore-link {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.explore-link:hover {
+  color: var(--color-text-muted);
+}
+
+.explore-link--static {
+  cursor: default;
+  text-decoration: none;
+  color: var(--color-text-muted);
+}
+
+.details-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.details-breadcrumb a {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+}
+
+.details-breadcrumb a:hover {
+  color: var(--color-text);
+}
+
+/* ════════════════════════════════════════════════════════════
+   Responsive
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .reviews-list {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-months {
+    grid-template-columns: 1fr;
+  }
+
+  .cal-month:last-child {
+    display: none;
+  }
+
+  .explore-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

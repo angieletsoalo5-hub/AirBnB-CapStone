@@ -1,4 +1,6 @@
-﻿ *  - Heading (title, rating/reviews/location) + Share/Save
+/**
+ * LocationDetails page – single listing view, matching the Figma mock:
+ *  - Heading (title, rating/reviews/location) + Share/Save
  *  - Photo gallery + "Show all photos" lightbox
  *  - Host intro row + highlights + description
  *  - Where you'll sleep (photo card)
@@ -19,7 +21,7 @@ import { useAuth } from '../context/AuthContext';
 import { api, resolveImageUrl } from '../api/client';
 import './LocationDetails.css';
 
-// â”€â”€ Amenity icons (simple line SVGs, replacing the old emoji map) â”€â”€
+// ── Amenity icons (simple line SVGs, replacing the old emoji map) ──
 const AMENITY_TYPES = {
   wifi: 'wifi',
   pool: 'pool',
@@ -146,7 +148,7 @@ function AmenityIcon({ type }) {
   }
 }
 
-// â”€â”€ Superhost badge icon (ribbon/medal) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Superhost badge icon (ribbon/medal) ────────────────────
 function SuperhostBadge() {
   return (
     <svg viewBox="0 0 32 40" className="superhost-badge__icon" aria-hidden="true">
@@ -159,8 +161,8 @@ function SuperhostBadge() {
   );
 }
 
-// â”€â”€ Sample guest reviews (illustrative â€” the backend only
-//    stores aggregate rating/review counts, not full comments) â”€â”€
+// ── Sample guest reviews (illustrative — the backend only
+//    stores aggregate rating/review counts, not full comments) ──
 const SAMPLE_REVIEWS = [
   { name: 'Jose', date: 'December 2021', comment: 'Host was very attentive.' },
   { name: 'Luke', date: 'December 2021', comment: 'Nice place to stay!' },
@@ -168,7 +170,7 @@ const SAMPLE_REVIEWS = [
     name: 'Shayna',
     date: 'December 2021',
     comment:
-      'Wonderful neighborhood, easy access to restaurants and the subway, cozy studio apartment with a super comfortable bed. Great host, super helpful and responsive. Cool murphy bedâ€¦',
+      'Wonderful neighborhood, easy access to restaurants and the subway, cozy studio apartment with a super comfortable bed. Great host, super helpful and responsive. Cool murphy bed…',
   },
   {
     name: 'Josh',
@@ -185,12 +187,12 @@ const SAMPLE_REVIEWS = [
     name: 'Jennifer',
     date: 'January 2022',
     comment:
-      'A centric place, near of a sub station and a supermarket with everything you needâ€¦',
+      'A centric place, near of a sub station and a supermarket with everything you need…',
   },
 ];
 
-// â”€â”€ Nearby destinations (Explore other options) â€” matches the
-//    cities already seeded in this app rather than fictional ones â”€â”€
+// ── Nearby destinations (Explore other options) — matches the
+//    cities already seeded in this app rather than fictional ones ──
 const EXPLORE_CITIES = [
   'Cape Town', 'Johannesburg', 'Durban', 'Pretoria',
   'Port Elizabeth', 'Stellenbosch', 'Knysna', 'Bloemfontein',
@@ -242,7 +244,7 @@ function formatLongDate(iso) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// â”€â”€ Placeholder image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Placeholder image ──────────────────────────────────────
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80';
 
 export default function LocationDetails() {
@@ -269,7 +271,7 @@ export default function LocationDetails() {
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Calendar â€” first of the two displayed months
+  // Calendar — first of the two displayed months
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -314,7 +316,7 @@ export default function LocationDetails() {
   }
 
   // True if any night strictly between two dates (exclusive) falls inside
-  // a booked range â€” used to stop a checkout click from spanning over a
+  // a booked range — used to stop a checkout click from spanning over a
   // booking that sits in the middle of the selected range.
   function rangeCrossesBooking(startIso, endIso) {
     return bookedRanges.some((r) => r.checkIn < endIso && r.checkOut > startIso);
@@ -371,7 +373,7 @@ export default function LocationDetails() {
       );
       setReserveSuccess(true);
       setReserveMessage(
-        'Reservation confirmed! View it in your profile â†’ "View reservations".'
+        'Reservation confirmed! View it in your profile → "View reservations".'
       );
       setCheckIn('');
       setCheckOut('');
@@ -380,7 +382,7 @@ export default function LocationDetails() {
       api.getAccommodation(listing._id).then(setListing).catch(() => {});
     } catch (err) {
       setReserveMessage(err.message);
-      // Someone else may have just grabbed these dates â€” refresh so the
+      // Someone else may have just grabbed these dates — refresh so the
       // calendar reflects reality instead of still showing them as free.
       api.getAccommodation(listing._id).then(setListing).catch(() => {});
     } finally {
@@ -388,18 +390,18 @@ export default function LocationDetails() {
     }
   }
 
-  // Share handler â€” copies the current URL to the clipboard
+  // Share handler — copies the current URL to the clipboard
   async function handleShare() {
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* clipboard not available â€” silently ignore */
+      /* clipboard not available — silently ignore */
     }
   }
 
-  // Calendar day click â€” first click sets check-in, second sets check-out
+  // Calendar day click — first click sets check-in, second sets check-out
   function handleDayClick(date) {
     if (!date) return;
     const iso = toISODate(date);
@@ -413,7 +415,7 @@ export default function LocationDetails() {
       setCheckOut('');
     } else if (rangeCrossesBooking(checkIn, iso)) {
       // Picking this as checkout would span over a night that's already
-      // booked in between â€” restart the selection from this day instead.
+      // booked in between — restart the selection from this day instead.
       setCheckIn(iso);
       setCheckOut('');
     } else {
@@ -426,14 +428,14 @@ export default function LocationDetails() {
     setCheckOut('');
   }
 
-  // â”€â”€ Loading & Error states â”€â”€
+  // ── Loading & Error states ──
   if (loading) {
     return (
       <>
         <Header />
         <div className="details-status container" aria-live="polite">
           <div className="spinner" aria-hidden="true" />
-          <p>Loading listingâ€¦</p>
+          <p>Loading listing…</p>
         </div>
         <Footer />
       </>
@@ -447,7 +449,7 @@ export default function LocationDetails() {
         <div className="details-status details-status--error container" role="alert">
           <p>{error || 'Listing not found.'}</p>
           <button className="btn btn-outline" onClick={() => navigate(-1)}>
-            â† Go back
+            ← Go back
           </button>
         </div>
         <Footer />
@@ -516,7 +518,7 @@ export default function LocationDetails() {
                 disabled={isPast || isBooked}
                 onClick={() => handleDayClick(date)}
                 aria-pressed={isStart || isEnd}
-                aria-label={`${date.toDateString()}${isBooked ? ' â€” already booked' : ''}`}
+                aria-label={`${date.toDateString()}${isBooked ? ' — already booked' : ''}`}
                 title={isBooked ? 'Already booked' : undefined}
               >
                 {date.getDate()}
@@ -534,13 +536,13 @@ export default function LocationDetails() {
 
       <article className="details-page container">
 
-        {/* â•â•â•â• Heading â•â•â•â• */}
+        {/* ════ Heading ════ */}
         <header className="details-heading">
           <div className="details-heading__top">
             <h1 className="details-title">{listing.title}</h1>
             <div className="details-heading__actions">
               <button type="button" className="details-action-btn" onClick={handleShare}>
-                <span aria-hidden="true">â¤´</span> {copied ? 'Link copied!' : 'Share'}
+                <span aria-hidden="true">⤴</span> {copied ? 'Link copied!' : 'Share'}
               </button>
               <button
                 type="button"
@@ -548,14 +550,14 @@ export default function LocationDetails() {
                 onClick={() => setSaved((s) => !s)}
                 aria-pressed={saved}
               >
-                <span aria-hidden="true">{saved ? 'â™¥' : 'â™¡'}</span> Save
+                <span aria-hidden="true">{saved ? '♥' : '♡'}</span> Save
               </button>
             </div>
           </div>
           <div className="details-meta-row">
             {listing.rating > 0 && (
               <span className="details-meta-item details-rating">
-                â˜… {listing.rating.toFixed(1)}
+                ★ {listing.rating.toFixed(1)}
               </span>
             )}
             {listing.reviews > 0 && (
@@ -567,18 +569,18 @@ export default function LocationDetails() {
             )}
             {listing.rating >= 4.5 && (
               <>
-                <span className="details-meta-dot" aria-hidden="true">Â·</span>
+                <span className="details-meta-dot" aria-hidden="true">·</span>
                 <span className="details-meta-item">Superhost</span>
               </>
             )}
-            <span className="details-meta-dot" aria-hidden="true">Â·</span>
+            <span className="details-meta-dot" aria-hidden="true">·</span>
             <span className="details-meta-item details-location-link">
               <a href="#map" className="details-underline-link">{listing.location}</a>
             </span>
           </div>
         </header>
 
-        {/* â•â•â•â• Gallery â•â•â•â• */}
+        {/* ════ Gallery ════ */}
         <div className="details-gallery" aria-label="Property photos">
           <img
             src={mainImage}
@@ -590,7 +592,7 @@ export default function LocationDetails() {
               <img
                 key={i}
                 src={restImages[i] || mainImage}
-                alt={`${listing.title} â€“ photo ${i + 2}`}
+                alt={`${listing.title} – photo ${i + 2}`}
                 className="gallery-thumb"
                 loading="lazy"
               />
@@ -601,11 +603,11 @@ export default function LocationDetails() {
             className="gallery-show-all-btn"
             onClick={() => setShowAllPhotos(true)}
           >
-            <span aria-hidden="true">â–¦</span> Show all photos
+            <span aria-hidden="true">▦</span> Show all photos
           </button>
         </div>
 
-        {/* â•â•â•â• Photo lightbox â•â•â•â• */}
+        {/* ════ Photo lightbox ════ */}
         {showAllPhotos && (
           <div className="photo-lightbox" role="dialog" aria-modal="true" aria-label="All photos">
             <button
@@ -614,20 +616,20 @@ export default function LocationDetails() {
               onClick={() => setShowAllPhotos(false)}
               aria-label="Close photo gallery"
             >
-              âœ• Close
+              ✕ Close
             </button>
             <div className="photo-lightbox__grid">
               {images.map((src, i) => (
-                <img key={i} src={src} alt={`${listing.title} â€“ photo ${i + 1}`} />
+                <img key={i} src={src} alt={`${listing.title} – photo ${i + 1}`} />
               ))}
             </div>
           </div>
         )}
 
-        {/* â•â•â•â• Two-column body â•â•â•â• */}
+        {/* ════ Two-column body ════ */}
         <div className="details-body">
 
-          {/* â”€â”€ Left column â”€â”€ */}
+          {/* ── Left column ── */}
           <div className="details-main">
 
             {/* Type + host intro */}
@@ -728,7 +730,7 @@ export default function LocationDetails() {
 
             <hr className="details-divider" />
 
-            {/* â•â•â•â• Calendar â•â•â•â• */}
+            {/* ════ Calendar ════ */}
             <section aria-label="Select dates" className="calendar-section">
               <h3 className="details-section-title">
                 {calendarNights > 0
@@ -737,9 +739,9 @@ export default function LocationDetails() {
               </h3>
               <p className="calendar-subtitle">
                 {checkIn && checkOut
-                  ? `${formatLongDate(checkIn)} â€“ ${formatLongDate(checkOut)}`
+                  ? `${formatLongDate(checkIn)} – ${formatLongDate(checkOut)}`
                   : checkIn
-                  ? `${formatLongDate(checkIn)} â€“ Add checkout date`
+                  ? `${formatLongDate(checkIn)} – Add checkout date`
                   : 'Add your travel dates for exact pricing'}
               </p>
 
@@ -750,7 +752,7 @@ export default function LocationDetails() {
                   onClick={() => setCalendarMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
                   aria-label="Previous month"
                 >
-                  â€¹
+                  ‹
                 </button>
                 <div className="calendar-months">
                   {renderMonth(monthA)}
@@ -762,7 +764,7 @@ export default function LocationDetails() {
                   onClick={() => setCalendarMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
                   aria-label="Next month"
                 >
-                  â€º
+                  ›
                 </button>
               </div>
 
@@ -779,7 +781,7 @@ export default function LocationDetails() {
             {listing.rating > 0 && (
               <section id="reviews" aria-label="Ratings">
                 <h3 className="details-section-title">
-                  â˜… {listing.rating.toFixed(1)} &middot; {listing.reviews} review{listing.reviews !== 1 ? 's' : ''}
+                  ★ {listing.rating.toFixed(1)} &middot; {listing.reviews} review{listing.reviews !== 1 ? 's' : ''}
                 </h3>
                 {listing.specificRatings && (
                   <div className="ratings-grid">
@@ -804,7 +806,7 @@ export default function LocationDetails() {
                             aria-label={`${label}: ${val ?? 0} out of 5`}
                           />
                         </div>
-                        <span className="rating-val">{val?.toFixed(1) ?? 'â€”'}</span>
+                        <span className="rating-val">{val?.toFixed(1) ?? '—'}</span>
                       </div>
                     ))}
                   </div>
@@ -841,7 +843,7 @@ export default function LocationDetails() {
 
             <hr className="details-divider" />
 
-            {/* â•â•â•â• Host card â•â•â•â• */}
+            {/* ════ Host card ════ */}
             <section aria-label="Meet your host" className="host-card">
               <div className="host-card__top">
                 <div className="host-card__avatar" aria-hidden="true">
@@ -856,9 +858,9 @@ export default function LocationDetails() {
               {listing.rating >= 4.5 && (
                 <p className="host-card__badges">
                   {listing.reviews > 0 && <span>{listing.reviews} Reviews</span>}
-                  <span aria-hidden="true">Â·</span>
-                  <span>âœ“ Identity verified</span>
-                  <span aria-hidden="true">Â·</span>
+                  <span aria-hidden="true">·</span>
+                  <span>✓ Identity verified</span>
+                  <span aria-hidden="true">·</span>
                   <span>Superhost</span>
                 </p>
               )}
@@ -927,7 +929,7 @@ export default function LocationDetails() {
 
             <hr className="details-divider" />
 
-            {/* â•â•â•â• Explore other options / Unique stays â•â•â•â• */}
+            {/* ════ Explore other options / Unique stays ════ */}
             <section aria-label="Explore other options" className="explore-section">
               <h3 className="details-section-title">Explore other options nearby</h3>
               <div className="explore-grid">
@@ -954,15 +956,15 @@ export default function LocationDetails() {
 
               <nav className="details-breadcrumb" aria-label="Breadcrumb">
                 <Link to="/">Airbnb</Link>
-                <span aria-hidden="true">â€º</span>
+                <span aria-hidden="true">›</span>
                 <Link to="/locations">Explore</Link>
-                <span aria-hidden="true">â€º</span>
+                <span aria-hidden="true">›</span>
                 <span>{listing.location}</span>
               </nav>
             </section>
           </div>
 
-          {/* â”€â”€ Right sidebar (sticky calculator) â”€â”€ */}
+          {/* ── Right sidebar (sticky calculator) ── */}
           <aside className="cost-calculator" aria-label="Booking calculator">
             <div className="calc-header">
               <p className="calc-price">
@@ -971,7 +973,7 @@ export default function LocationDetails() {
               </p>
               {listing.rating > 0 && (
                 <p className="calc-rating">
-                  â˜… {listing.rating.toFixed(1)}{' '}
+                  ★ {listing.rating.toFixed(1)}{' '}
                   <span className="calc-rating-count">
                     ({listing.reviews} review{listing.reviews !== 1 ? 's' : ''})
                   </span>
@@ -1032,7 +1034,7 @@ export default function LocationDetails() {
               disabled={reserving}
               aria-busy={reserving}
             >
-              {reserving ? 'Reservingâ€¦' : 'Reserve'}
+              {reserving ? 'Reserving…' : 'Reserve'}
             </button>
 
             {/* Feedback message */}
@@ -1052,7 +1054,7 @@ export default function LocationDetails() {
               <div className="calc-breakdown" aria-label="Cost breakdown">
                 <div className="calc-line">
                   <span>
-                    R{fmt(listing.price)} Ã— {costBreakdown.nights} night
+                    R{fmt(listing.price)} × {costBreakdown.nights} night
                     {costBreakdown.nights > 1 ? 's' : ''}
                   </span>
                   <span>R{fmt(costBreakdown.subtotal)}</span>
@@ -1061,7 +1063,7 @@ export default function LocationDetails() {
                 {costBreakdown.weeklyDiscountAmount > 0 && (
                   <div className="calc-line calc-line--discount">
                     <span>Weekly discount</span>
-                    <span>âˆ’R{fmt(costBreakdown.weeklyDiscountAmount)}</span>
+                    <span>−R{fmt(costBreakdown.weeklyDiscountAmount)}</span>
                   </div>
                 )}
 

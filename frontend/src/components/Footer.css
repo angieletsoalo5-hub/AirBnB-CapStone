@@ -7,6 +7,7 @@
   margin-top: auto;
 }
 
+/* ── Main columns ── */
 .footer-columns {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -44,6 +45,7 @@
   text-decoration-color: currentColor;
 }
 
+/* ── Bottom bar ── */
 .footer-bottom {
   border-top: 1px solid var(--color-border);
   background: var(--color-bg);
@@ -158,6 +160,7 @@
   color: var(--color-primary);
 }
 
+/* ── Responsive ── */
 @media (max-width: 900px) {
   .footer-columns {
     grid-template-columns: repeat(2, 1fr);

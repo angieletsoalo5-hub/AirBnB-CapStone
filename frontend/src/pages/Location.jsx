@@ -1,3 +1,9 @@
+/**
+ * Location / Search-results page
+ * Reads ?location= from the URL, fetches matching accommodations
+ * and renders them in an Airbnb-style responsive grid.
+ */
+
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
@@ -16,6 +22,7 @@ export default function Location() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  /* ── Filter state ── */
   const [freeCancellation, setFreeCancellation] = useState(false);
   const [instantBook, setInstantBook] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -24,6 +31,7 @@ export default function Location() {
   const [minBedrooms, setMinBedrooms] = useState(0);
   const [minBathrooms, setMinBathrooms] = useState(0);
 
+  /* ── Popover open state + outside-click handling ── */
   const [typeOpen, setTypeOpen] = useState(false);
   const [priceOpen, setPriceOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -41,9 +49,11 @@ export default function Location() {
     return () => document.removeEventListener('mousedown', handleOutside);
   }, []);
 
+  /* Fetch whenever the location filter changes */
   useEffect(() => {
     setLoading(true);
     setError('');
+
     api
       .getAccommodations(locationFilter)
       .then((data) => setListings(Array.isArray(data) ? data : []))
@@ -55,19 +65,23 @@ export default function Location() {
     navigate(`/locations?location=${encodeURIComponent(value)}`);
   }
 
+  // Distinct property types present in the current result set, for the
+  // "Type of place" popover — always reflects real data, never a hardcoded list.
   const availableTypes = useMemo(
     () => [...new Set(listings.map((l) => l.type).filter(Boolean))].sort(),
     [listings]
   );
 
   function toggleType(t) {
-    setSelectedTypes((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
+    setSelectedTypes((prev) =>
+      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+    );
   }
-
   const hasMoreFilters = minBedrooms > 0 || minBathrooms > 0;
   const hasPriceFilter = priceMin !== '' || priceMax !== '';
   const hasTypeFilter = selectedTypes.length > 0;
-  const anyFilterActive = freeCancellation || instantBook || hasTypeFilter || hasPriceFilter || hasMoreFilters;
+  const anyFilterActive =
+    freeCancellation || instantBook || hasTypeFilter || hasPriceFilter || hasMoreFilters;
 
   function clearAllFilters() {
     setFreeCancellation(false);
@@ -79,6 +93,7 @@ export default function Location() {
     setMinBathrooms(0);
   }
 
+  // Apply every active filter client-side against the fetched result set
   const filteredListings = useMemo(() => {
     return listings.filter((l) => {
       if (freeCancellation && !l.freeCancellation) return false;
@@ -99,9 +114,14 @@ export default function Location() {
     ? `${resultsCount} Airbnb Luxe stays in ${locationFilter}`
     : `${resultsCount} Airbnb Luxe stays available`;
 
-  const priceLabel = hasPriceFilter ? `R${priceMin || 0}${priceMax ? ` – R${priceMax}` : '+'}` : 'Price';
+  const priceLabel = hasPriceFilter
+    ? `R${priceMin || 0}${priceMax ? ` – R${priceMax}` : '+'}`
+    : 'Price';
+
   const typeLabel = hasTypeFilter
-    ? selectedTypes.length === 1 ? selectedTypes[0] : `${selectedTypes.length} types`
+    ? selectedTypes.length === 1
+      ? selectedTypes[0]
+      : `${selectedTypes.length} types`
     : 'Type of place';
 
   return (
@@ -109,24 +129,45 @@ export default function Location() {
       <Header onFilter={handleFilter} defaultLocation={locationFilter} />
 
       <main className="location-main container">
+        {/* ── Results toolbar: count line + filter pill row ── */}
         <div className="results-toolbar">
           <p className="results-count">{countLabel}</p>
 
           <div className="filter-bar" role="list" aria-label="Filter results">
-            <button type="button" className={`filter-pill${freeCancellation ? ' filter-pill--active' : ''}`} onClick={() => setFreeCancellation((v) => !v)} role="listitem" aria-pressed={freeCancellation}>
+            {/* Free cancellation — simple toggle */}
+            <button
+              type="button"
+              className={`filter-pill${freeCancellation ? ' filter-pill--active' : ''}`}
+              onClick={() => setFreeCancellation((v) => !v)}
+              role="listitem"
+              aria-pressed={freeCancellation}
+            >
               Free cancellation
             </button>
 
+            {/* Type of place — multi-select popover */}
             <div className="filter-pill-wrap" ref={typeRef}>
-              <button type="button" className={`filter-pill${hasTypeFilter ? ' filter-pill--active' : ''}`} onClick={() => { setTypeOpen((o) => !o); setPriceOpen(false); setMoreOpen(false); }} aria-expanded={typeOpen} aria-haspopup="dialog">
+              <button
+                type="button"
+                className={`filter-pill${hasTypeFilter ? ' filter-pill--active' : ''}`}
+                onClick={() => { setTypeOpen((o) => !o); setPriceOpen(false); setMoreOpen(false); }}
+                aria-expanded={typeOpen}
+                aria-haspopup="dialog"
+              >
                 {typeLabel}
               </button>
               {typeOpen && (
                 <div className="filter-popover" role="dialog" aria-label="Filter by type of place">
-                  {availableTypes.length === 0 && <p className="filter-popover__empty">No types available yet</p>}
+                  {availableTypes.length === 0 && (
+                    <p className="filter-popover__empty">No types available yet</p>
+                  )}
                   {availableTypes.map((t) => (
                     <label key={t} className="filter-popover__option">
-                      <input type="checkbox" checked={selectedTypes.includes(t)} onChange={() => toggleType(t)} />
+                      <input
+                        type="checkbox"
+                        checked={selectedTypes.includes(t)}
+                        onChange={() => toggleType(t)}
+                      />
                       {t}
                     </label>
                   ))}
@@ -134,30 +175,63 @@ export default function Location() {
               )}
             </div>
 
+            {/* Price — min/max range popover */}
             <div className="filter-pill-wrap" ref={priceRef}>
-              <button type="button" className={`filter-pill${hasPriceFilter ? ' filter-pill--active' : ''}`} onClick={() => { setPriceOpen((o) => !o); setTypeOpen(false); setMoreOpen(false); }} aria-expanded={priceOpen} aria-haspopup="dialog">
+              <button
+                type="button"
+                className={`filter-pill${hasPriceFilter ? ' filter-pill--active' : ''}`}
+                onClick={() => { setPriceOpen((o) => !o); setTypeOpen(false); setMoreOpen(false); }}
+                aria-expanded={priceOpen}
+                aria-haspopup="dialog"
+              >
                 {priceLabel}
               </button>
               {priceOpen && (
                 <div className="filter-popover filter-popover--price" role="dialog" aria-label="Filter by price range">
                   <label className="filter-popover__field">
                     <span>Min price (R)</span>
-                    <input type="number" min="0" placeholder="0" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} />
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={priceMin}
+                      onChange={(e) => setPriceMin(e.target.value)}
+                    />
                   </label>
                   <label className="filter-popover__field">
                     <span>Max price (R)</span>
-                    <input type="number" min="0" placeholder="Any" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} />
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="Any"
+                      value={priceMax}
+                      onChange={(e) => setPriceMax(e.target.value)}
+                    />
                   </label>
                 </div>
               )}
             </div>
 
-            <button type="button" className={`filter-pill${instantBook ? ' filter-pill--active' : ''}`} onClick={() => setInstantBook((v) => !v)} role="listitem" aria-pressed={instantBook}>
+            {/* Instant Book — simple toggle */}
+            <button
+              type="button"
+              className={`filter-pill${instantBook ? ' filter-pill--active' : ''}`}
+              onClick={() => setInstantBook((v) => !v)}
+              role="listitem"
+              aria-pressed={instantBook}
+            >
               Instant Book
             </button>
 
+            {/* More filters — bedrooms / bathrooms minimums */}
             <div className="filter-pill-wrap" ref={moreRef}>
-              <button type="button" className={`filter-pill filter-pill--more${hasMoreFilters ? ' filter-pill--active' : ''}`} onClick={() => { setMoreOpen((o) => !o); setTypeOpen(false); setPriceOpen(false); }} aria-expanded={moreOpen} aria-haspopup="dialog">
+              <button
+                type="button"
+                className={`filter-pill filter-pill--more${hasMoreFilters ? ' filter-pill--active' : ''}`}
+                onClick={() => { setMoreOpen((o) => !o); setTypeOpen(false); setPriceOpen(false); }}
+                aria-expanded={moreOpen}
+                aria-haspopup="dialog"
+              >
                 <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
                   <path d="M1 2h14M4 8h8M6.5 14h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" fill="none" />
                 </svg>
@@ -167,22 +241,35 @@ export default function Location() {
                 <div className="filter-popover filter-popover--more" role="dialog" aria-label="More filters">
                   <label className="filter-popover__field">
                     <span>Min bedrooms</span>
-                    <input type="number" min="0" value={minBedrooms} onChange={(e) => setMinBedrooms(Math.max(0, Number(e.target.value)))} />
+                    <input
+                      type="number"
+                      min="0"
+                      value={minBedrooms}
+                      onChange={(e) => setMinBedrooms(Math.max(0, Number(e.target.value)))}
+                    />
                   </label>
                   <label className="filter-popover__field">
                     <span>Min bathrooms</span>
-                    <input type="number" min="0" value={minBathrooms} onChange={(e) => setMinBathrooms(Math.max(0, Number(e.target.value)))} />
+                    <input
+                      type="number"
+                      min="0"
+                      value={minBathrooms}
+                      onChange={(e) => setMinBathrooms(Math.max(0, Number(e.target.value)))}
+                    />
                   </label>
                 </div>
               )}
             </div>
 
             {anyFilterActive && (
-              <button type="button" className="filter-clear-all" onClick={clearAllFilters}>Clear all</button>
+              <button type="button" className="filter-clear-all" onClick={clearAllFilters}>
+                Clear all
+              </button>
             )}
           </div>
         </div>
 
+        {/* ── States ── */}
         {loading && (
           <div className="location-status" aria-live="polite">
             <div className="spinner" aria-hidden="true" />
@@ -193,26 +280,43 @@ export default function Location() {
         {!loading && error && (
           <div className="location-status location-status--error" role="alert">
             <p>{error}</p>
-            <button className="btn btn-outline" onClick={() => handleFilter(locationFilter)}>Try again</button>
+            <button
+              className="btn btn-outline"
+              onClick={() => handleFilter(locationFilter)}
+            >
+              Try again
+            </button>
           </div>
         )}
 
         {!loading && !error && listings.length > 0 && filteredListings.length === 0 && (
           <div className="location-status location-status--empty">
             <p className="location-empty__title">No exact matches</p>
-            <p className="location-empty__subtitle">Try different dates, removing some filters, or a different destination.</p>
-            <button className="btn btn-outline" onClick={clearAllFilters}>Clear filters</button>
+            <p className="location-empty__subtitle">
+              Try different dates, removing some filters, or a different destination.
+            </p>
+            <button className="btn btn-outline" onClick={clearAllFilters}>
+              Clear filters
+            </button>
           </div>
         )}
 
         {!loading && !error && listings.length === 0 && (
           <div className="location-status location-status--empty">
             <p className="location-empty__title">No exact matches</p>
-            <p className="location-empty__subtitle">Try different dates, removing some filters, or a different destination.</p>
-            <button className="btn btn-outline" onClick={() => navigate('/locations')}>Clear filters</button>
+            <p className="location-empty__subtitle">
+              Try different dates, removing some filters, or a different destination.
+            </p>
+            <button
+              className="btn btn-outline"
+              onClick={() => navigate('/locations')}
+            >
+              Clear filters
+            </button>
           </div>
         )}
 
+        {/* ── Listings grid ── */}
         {!loading && !error && filteredListings.length > 0 && (
           <div className="listings-grid" aria-label="Available stays">
             {filteredListings.map((listing) => (

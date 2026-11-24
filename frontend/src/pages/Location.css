@@ -14,7 +14,10 @@
   padding-bottom: 64px;
 }
 
-.results-toolbar { margin-bottom: 24px; }
+/* ── Results toolbar: count line + filter pill row ── */
+.results-toolbar {
+  margin-bottom: 24px;
+}
 
 .results-count {
   font-size: var(--font-size-sm);
@@ -47,7 +50,9 @@
   flex-shrink: 0;
 }
 
-.filter-pill:hover { border-color: var(--color-text); }
+.filter-pill:hover {
+  border-color: var(--color-text);
+}
 
 .filter-pill--active {
   background: var(--color-text);
@@ -55,9 +60,17 @@
   color: #fff;
 }
 
-.filter-pill--more svg { width: 14px; height: 14px; flex-shrink: 0; }
+.filter-pill--more svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
 
-.filter-pill-wrap { position: relative; flex-shrink: 0; }
+/* ── Popover wrapper + panels (Type of place / Price / More filters) ── */
+.filter-pill-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
 
 .filter-popover {
   position: absolute;
@@ -98,7 +111,8 @@
   margin: 0;
 }
 
-.filter-popover--price, .filter-popover--more {
+.filter-popover--price,
+.filter-popover--more {
   flex-direction: row;
   gap: 14px;
   min-width: 260px;
@@ -124,6 +138,7 @@
   width: 100px;
 }
 
+/* ── Clear all ── */
 .filter-clear-all {
   background: none;
   border: none;
@@ -138,8 +153,11 @@
   padding: 8px 4px;
 }
 
-.filter-clear-all:hover { color: var(--color-primary); }
+.filter-clear-all:hover {
+  color: var(--color-primary);
+}
 
+/* ── Status panels ── */
 .location-status {
   display: flex;
   flex-direction: column;
@@ -151,8 +169,13 @@
   color: var(--color-text-muted);
 }
 
-.location-status--error { color: #c62828; }
-.location-status--empty { color: var(--color-text); }
+.location-status--error {
+  color: #c62828;
+}
+
+.location-status--empty {
+  color: var(--color-text);
+}
 
 .location-empty__title {
   font-size: var(--font-size-xl);
@@ -166,6 +189,7 @@
   max-width: 380px;
 }
 
+/* ── Listings grid ── */
 .listings-grid {
   display: flex;
   flex-direction: column;

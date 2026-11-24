@@ -1,5 +1,7 @@
 /* ============================================================
-   LocationCard – flat list row (small image left, details right)
+   LocationCard – flat list row (small image left, details right),
+   separated by a bottom divider. Matches the Figma results-page
+   listing rows (no card border/box/shadow).
    ============================================================ */
 
 .loc-card {
@@ -22,6 +24,7 @@
   background: var(--color-bg-alt);
 }
 
+/* ── Image (left) ── */
 .loc-card__img-wrap {
   position: relative;
   flex: 0 0 140px;
@@ -43,6 +46,7 @@
   transform: scale(1.05);
 }
 
+/* ── Wishlist button — top-right corner of the row ── */
 .loc-card__wishlist {
   position: absolute;
   top: 16px;
@@ -70,6 +74,7 @@
   height: 18px;
 }
 
+/* ── Details (right) ── */
 .loc-card__body {
   flex: 1;
   min-width: 0;
@@ -162,6 +167,7 @@
   color: var(--color-text-muted);
 }
 
+/* ── Responsive: stack image above details on narrow screens ── */
 @media (max-width: 640px) {
   .loc-card {
     flex-direction: column;

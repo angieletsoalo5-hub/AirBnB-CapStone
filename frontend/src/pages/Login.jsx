@@ -1,3 +1,13 @@
+/**
+ * Login / Sign-up page
+ * Matches Airbnb's modal-style centered card with:
+ *  - Mode toggle (Log in / Sign up)
+ *  - Welcoming header with logo
+ *  - Input fields with validation
+ *  - Role selector for sign-up
+ *  - Error feedback
+ */
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +18,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,9 +35,18 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-    if (mode === 'signup' && !username.trim()) { setError('Please enter a username.'); return; }
-    if (!email.trim()) { setError('Please enter your email.'); return; }
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (mode === 'signup' && !username.trim()) {
+      setError('Please enter a username.');
+      return;
+    }
+    if (!email.trim()) {
+      setError('Please enter your email.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -45,70 +64,176 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <Link to="/" className="login-back" aria-label="Return to home">← Back to home</Link>
+      {/* Back to home */}
+      <Link to="/" className="login-back" aria-label="Return to home">
+        ← Back to home
+      </Link>
 
       <div className="login-card">
+        {/* Header */}
         <div className="login-card__header">
+          {/* Airbnb logo mark + wordmark */}
           <div className="login-logo">
             <svg className="login-logo-mark" viewBox="0 0 32 32" aria-hidden="true">
-              <path d="m15.9999986 1c1.5233269 0 2.8853262.63480054 3.8953593 1.81519027.3882762.45341363.68547.92629092 1.0843684 1.66682671.2077895.38580736.3771705.71048333.7298554 1.39396099 2.3978208 4.64232753 4.6209922 9.18314333 6.7016244 13.68538313.3594669.7766385.527891 1.1447222.7200167 1.5790784.1995583.4508363.3280074.7623354.4419855 1.0821517.3997766 1.1232419.5159428 2.1707386.3600275 3.2582239-.3240931 2.2557302-1.8367 4.1856521-3.95096 5.0409981-1.0254641.4151758-2.1422465.5625301-3.2696353.4321454-1.0267657-.118929-2.024688-.4558168-3.0351712-1.0229726-1.275365-.7159866-2.5350312-1.7827288-3.9051464-3.3033582l.2266757.2483722-.0856973.0946079c-1.145637 1.2281003-2.2190841 2.1368979-3.2968208 2.7889023l-.294092.1714995c-1.0104269.5671868-2.0081759.904038-3.03521001 1.0229618-1.12673901.1303811-2.24398199-.0169897-3.26921311-.4319769-2.11483177-.8556897-3.62749027-2.7857059-3.95111189-5.0412542-.1561593-1.0874722-.03988101-2.1352549.36013074-3.2579563.11409432-.3205601.24289579-.6332632.441636-1.0823287.01870988-.0422708.03714338-.0838012.05551118-.1250574l.11110373-.2479763c.13263376-.2941687.28269418-.6205865.52244291-1.1391507 2.09685793-4.5370071 4.31810871-9.0773027 6.63389165-13.56082146.3456232-.67003797.5228704-1.01175086.6839133-1.31498818l.0958986-.17964411.0487735-.090707c.3992391-.74059748.6959289-1.21278252 1.0833854-1.66583756 1.0105713-1.18121403 2.3727886-1.81627269 3.8964581-1.81627269z" fill="currentColor" />
+              <path d="m15.9999986 1c1.5233269 0 2.8853262.63480054 3.8953593 1.81519027.3882762.45341363.68547.92629092 1.0843684 1.66682671.2077895.38580736.3771705.71048333.7298554 1.39396099 2.3978208 4.64232753 4.6209922 9.18314333 6.7016244 13.68538313.3594669.7766385.527891 1.1447222.7200167 1.5790784.1995583.4508363.3280074.7623354.4419855 1.0821517.3997766 1.1232419.5159428 2.1707386.3600275 3.2582239-.3240931 2.2557302-1.8367 4.1856521-3.95096 5.0409981-1.0254641.4151758-2.1422465.5625301-3.2696353.4321454-1.0267657-.118929-2.024688-.4558168-3.0351712-1.0229726-1.275365-.7159866-2.5350312-1.7827288-3.9051464-3.3033582l.2266757.2483722-.0856973.0946079c-1.145637 1.2281003-2.2190841 2.1368979-3.2968208 2.7889023l-.294092.1714995c-1.0104269.5671868-2.0081759.904038-3.03521001 1.0229618-1.12673901.1303811-2.24398199-.0169897-3.26921311-.4319769-2.11483177-.8556897-3.62749027-2.7857059-3.95111189-5.0412542-.1561593-1.0874722-.03988101-2.1352549.36013074-3.2579563.11409432-.3205601.24289579-.6332632.441636-1.0823287.01870988-.0422708.03714338-.0838012.05551118-.1250574l.11110373-.2479763c.13263376-.2941687.28269418-.6205865.52244291-1.1391507 2.09685793-4.5370071 4.31810871-9.0773027 6.63389165-13.56082146.3456232-.67003797.5228704-1.01175086.6839133-1.31498818l.0958986-.17964411.0487735-.090707c.3992391-.74059748.6959289-1.21278252 1.0833854-1.66583756 1.0105713-1.18121403 2.3727886-1.81627269 3.8964581-1.81627269zm0 2c-.9357093 0-1.7439367.37679147-2.376616 1.11630347-.2727479.31892556-.5058435.68989976-.8426534 1.31468985-.2066611.38352403-.3681548.69344615-.8119466 1.55379694-2.3026619 4.45811584-4.51106674 8.97215394-6.59567741 13.48266154-.33799415.7310639-.49440055 1.0730558-.67560657 1.4824502-.18028808.4073718-.29206578.6787447-.38641369.9438251-.29344585.823606-.37343524 1.5443898-.26452166 2.3028493.22246416 1.5505102 1.2666025 2.8827369 2.72167933 3.4714808.71257378.2884315 1.4926412.3913269 2.28896256.2991802.75498608-.0874224 1.50010934-.3389843 2.28616414-.7802234 1.0664463-.5987003 2.1638659-1.528022 3.3946495-2.893896l-.0050202.004882-.0460353-.0548826-.2509205-.3307798c-1.5986248-2.0506357-2.6945784-4.1266583-3.1953828-6.0163123l-.0869039-.3520744c-.2049003-.8980243-.2517696-1.7521883-.1293969-2.5444088.1129882-.7334321.3400138-1.3069957.7509809-1.9050448.9157202-1.332047 2.4906659-2.0765973 4.2246599-2.0765973 1.7345096 0 3.3089358.744586 4.2248369 2.0769638.4128117.600442.6794367 1.289915.7951886 2.0416792.1223241.793505.0752405 1.6482284-.1300758 2.5459202-.4596778 2.0107259-1.6826486 4.2124081-3.6358901 6.6190439l.006939-.0095071.2796231.3052286c1.0272775 1.102518 1.962231 1.8954979 2.8691353 2.4456635l.2466904.1440751c.7861051.4412186 1.531452.6928397 2.2861387.7802541.7968821.092161 1.5764803-.0107034 2.2893816-.299333 1.4546269-.5884846 2.4987869-1.9207192 2.7215543-3.4712094.1087392-.7584391.0287937-1.4793254-.2643894-2.3030746-.0939834-.2637121-.2055521-.5342749-.3868628-.9438867-.1861479-.4208417-.3513275-.7818347-.7063238-1.5488147-2.0684794-4.4759421-4.278793-8.9904961-6.6635078-13.60744971-.3475016-.67343258-.5131893-.99102902-.7135357-1.36301664-.3362982-.62432153-.5695057-.99538752-.8429089-1.31465716-.6324887-.73916697-1.4405312-1.11577939-2.375995-1.11577939zm.0000014 11.0179c-1.1044517 0-2.053392.4486084-2.5764348 1.2094494-.2403158.3497133-.355268.6401316-.422586 1.077108-.0817116.5289876-.048657 1.1313887.1026199 1.7943953.3578904 1.5670844 1.2547805 3.372518 2.6201179 5.2039558l.2762816.3631915.2705252-.3490551c1.3488597-1.7753983 2.2168226-3.3824571 2.5996521-4.7994463l.0700962-.2808572c.151582-.6627525.1847858-1.2655119.1030752-1.795561-.0708345-.4600426-.2276978-.8656798-.4666206-1.2131972-.5234347-.7614499-1.4718578-1.2099832-2.5767267-1.2099832z" fill="currentColor" />
             </svg>
             <span className="login-logo-text">airbnb</span>
           </div>
-          <h1 className="login-title">{mode === 'login' ? 'Welcome back' : 'Create your account'}</h1>
-          <p className="login-subtitle">{mode === 'login' ? 'Log in to your Airbnb account' : 'Join Airbnb to start booking or hosting'}</p>
+          <h1 className="login-title">
+            {mode === 'login' ? 'Welcome back' : 'Create your account'}
+          </h1>
+          <p className="login-subtitle">
+            {mode === 'login'
+              ? 'Log in to your Airbnb account'
+              : 'Join Airbnb to start booking or hosting'}
+          </p>
         </div>
 
+        {/* Form */}
         <form className="login-form" onSubmit={handleSubmit} noValidate>
-          {error && <div className="login-error" role="alert" aria-live="assertive">{error}</div>}
-
-          {mode === 'signup' && (
-            <div className="login-field">
-              <label className="login-label" htmlFor="username">Username</label>
-              <input id="username" type="text" className="login-input" placeholder="Enter a username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoFocus required />
+          {/* Error banner */}
+          {error && (
+            <div className="login-error" role="alert" aria-live="assertive">
+              {error}
             </div>
           )}
 
-          <div className="login-field">
-            <label className="login-label" htmlFor="email">Email</label>
-            <input id="email" type="email" className="login-input" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" autoFocus={mode === 'login'} required />
-          </div>
-
-          <div className="login-field">
-            <label className="login-label" htmlFor="password">Password</label>
-            <input id="password" type="password" className="login-input" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={6} required />
-          </div>
-
-          {mode === 'login' && <a href="#forgot" className="login-forgot">Forgot password?</a>}
-
+          {/* Username – sign-up only (display name shown on listings/reviews) */}
           {mode === 'signup' && (
             <div className="login-field">
-              <label className="login-label" htmlFor="role">I want to</label>
+              <label className="login-label" htmlFor="username">
+                Username
+              </label>
+              <input
+                id="username"
+                type="text"
+                className="login-input"
+                placeholder="Enter a username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+                autoFocus
+                required
+              />
+            </div>
+          )}
+
+          {/* Email */}
+          <div className="login-field">
+            <label className="login-label" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              className="login-input"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              autoFocus={mode === 'login'}
+              required
+            />
+          </div>
+
+          {/* Password */}
+          <div className="login-field">
+            <label className="login-label" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              className="login-input"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              minLength={6}
+              required
+            />
+          </div>
+
+          {/* Forgot password – login only */}
+          {mode === 'login' && (
+            <a href="#forgot" className="login-forgot">
+              Forgot password?
+            </a>
+          )}
+
+          {/* Role selector – sign-up only */}
+          {mode === 'signup' && (
+            <div className="login-field">
+              <label className="login-label" htmlFor="role">
+                I want to
+              </label>
               <div className="login-role-grid">
-                <label className={`login-role-option${role === 'user' ? ' login-role-option--active' : ''}`}>
-                  <input type="radio" name="role" value="user" checked={role === 'user'} onChange={() => setRole('user')} className="sr-only" />
+                <label
+                  className={`login-role-option${role === 'user' ? ' login-role-option--active' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name="role"
+                    value="user"
+                    checked={role === 'user'}
+                    onChange={() => setRole('user')}
+                    className="sr-only"
+                  />
                   <span className="login-role-text">Book stays</span>
                 </label>
-                <label className={`login-role-option${role === 'host' ? ' login-role-option--active' : ''}`}>
-                  <input type="radio" name="role" value="host" checked={role === 'host'} onChange={() => setRole('host')} className="sr-only" />
+
+                <label
+                  className={`login-role-option${role === 'host' ? ' login-role-option--active' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name="role"
+                    value="host"
+                    checked={role === 'host'}
+                    onChange={() => setRole('host')}
+                    className="sr-only"
+                  />
                   <span className="login-role-text">Host my place</span>
                 </label>
               </div>
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary login-submit" disabled={loading} aria-busy={loading}>
-            {loading ? (mode === 'login' ? 'Logging in…' : 'Creating account…') : (mode === 'login' ? 'Log in' : 'Sign up')}
+          {/* Submit */}
+          <button
+            type="submit"
+            className="btn btn-primary login-submit"
+            disabled={loading}
+            aria-busy={loading}
+          >
+            {loading
+              ? mode === 'login'
+                ? 'Logging in…'
+                : 'Creating account…'
+              : mode === 'login'
+              ? 'Log in'
+              : 'Sign up'}
           </button>
         </form>
 
+        {/* Host login */}
         <div className="login-switch-site">
           <p>Are you a host?</p>
-          <a href="/admin/login" className="login-host-link">Log in as a host</a>
+
+          <Link
+            to="/admin/login"
+            className="login-host-link"
+          >
+            Log in as a host
+          </Link>
         </div>
 
-        <div className="login-divider" aria-hidden="true"><span>or</span></div>
+        {/* Divider */}
+        <div className="login-divider" aria-hidden="true">
+          <span>or</span>
+        </div>
 
+        {/* Mode toggle */}
         <p className="login-toggle">
           {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
           <button type="button" className="login-toggle-btn" onClick={toggleMode}>
