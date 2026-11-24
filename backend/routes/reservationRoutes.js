@@ -1,32 +1,19 @@
-const express = require("express");
-const router = express.Router();
-
+const express = require('express');
 const {
   createReservation,
-  getMyReservations,
-  getReservationById,
-  cancelReservation,
-  getAllReservations,
-} = require("../controllers/reservationController");
+  getReservationsByHost,
+  getReservationsByUser,
+  deleteReservation,
+} = require('../controllers/reservationController');
+const { protect } = require('../middleware/authMiddleware');
 
-const {
-  protect,
-  adminOnly,
-} = require("../middleware/authMiddleware");
+const router = express.Router();
 
-// Create a new reservation
-router.post("/", protect, createReservation);
+// Specific string routes must be declared before the /:id param route below
+router.get('/host', protect, getReservationsByHost);
+router.get('/user', protect, getReservationsByUser);
 
-// Get all reservations - admin only
-router.get("/admin/all", protect, adminOnly, getAllReservations);
-
-// Get reservations for the logged-in user
-router.get("/my-reservations", protect, getMyReservations);
-
-// Get a specific reservation by ID
-router.get("/:id", protect, getReservationById);
-
-// Cancel a reservation
-router.put("/:id/cancel", protect, cancelReservation);
+router.post('/', protect, createReservation);
+router.delete('/:id', protect, deleteReservation);
 
 module.exports = router;

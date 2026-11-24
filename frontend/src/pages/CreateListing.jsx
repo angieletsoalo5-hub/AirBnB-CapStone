@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import AdminHeader from "../components/AdminHeader";
-
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5001/api";
 
 function CreateListing() {
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -39,10 +38,8 @@ function CreateListing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("token");
-
     if (!token) {
-      setMessage("You must be logged in as an admin.");
+      setMessage("You must be logged in as a host.");
       return;
     }
 
@@ -50,15 +47,7 @@ function CreateListing() {
       setLoading(true);
       setMessage("");
 
-      const response = await fetch(
-        `${API_URL}/accommodations`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
+      await api.createAccommodation({
             title: formData.title,
             description: formData.description,
             location: formData.location,
@@ -71,7 +60,7 @@ function CreateListing() {
               .split(",")
               .map((item) => item.trim())
               .filter(Boolean),
-            maxGuests: Number(formData.maxGuests),
+            guests: Number(formData.maxGuests),
             bedrooms: Number(formData.bedrooms),
             bathrooms: Number(formData.bathrooms),
             weeklyDiscount: Number(
@@ -86,17 +75,7 @@ function CreateListing() {
             occupancyTaxes: Number(
               formData.occupancyTaxes || 0
             ),
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to create listing"
-        );
-      }
+          }, token);
 
       navigate("/admin/listings");
     } catch (error) {
@@ -250,6 +229,7 @@ function CreateListing() {
                 placeholder="https://..."
                 value={formData.image}
                 onChange={handleChange}
+                required
               />
             </div>
 

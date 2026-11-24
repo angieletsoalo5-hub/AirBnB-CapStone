@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
+import { api } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import AdminHeader from "../components/AdminHeader";
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5001/api";
-
 function AdminReservations() {
+  const { token } = useAuth();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,26 +12,8 @@ function AdminReservations() {
   useEffect(() => {
     const loadReservations = async () => {
       try {
-        const token = localStorage.getItem("token");
-
-        const response = await fetch(
-          `${API_URL}/reservations/admin/all`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.message || "Failed to fetch reservations"
-          );
-        }
-
-        setReservations(data);
+        const data = await api.getHostReservations(token);
+        setReservations(Array.isArray(data) ? data : []);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -41,7 +22,7 @@ function AdminReservations() {
     };
 
     loadReservations();
-  }, []);
+  }, [token]);
 
   return (
     <div className="admin-dashboard">
@@ -113,7 +94,7 @@ function AdminReservations() {
 
                   <p>
                     <strong>Total:</strong>{" "}
-                    R{reservation.totalPrice}
+                    R{reservation.totalCost}
                   </p>
                 </div>
 

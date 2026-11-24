@@ -1,13 +1,14 @@
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function ProtectedAdminRoute({ children }) {
-  const token = localStorage.getItem("token");
+  const { user, loading } = useAuth();
 
-  const user = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
+  if (loading) {
+    return <p className="admin-auth-loading" role="status">Checking your account…</p>;
+  }
 
-  if (!token || user.role !== "admin") {
+  if (!user || user.role !== "host") {
     return <Navigate to="/admin/login" replace />;
   }
 

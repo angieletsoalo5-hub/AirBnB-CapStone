@@ -1,257 +1,189 @@
-const Reservation = require("../models/Reservation");
-const Accommodation = require("../models/Accommodation");
+const mongoose = require('mongoose');
+const Reservation = require('../models/Reservation');
+const Accommodation = require('../models/Accommodation');
+const asyncHandler = require('../utils/asyncHandler');
 
-// Create a new reservation
-const createReservation = async (req, res) => {
-  try {
-    const {
-      accommodation,
-      checkIn,
-      checkOut,
-      guests,
-    } = req.body;
+const MS_PER_NIGHT = 1000 * 60 * 60 * 24;
 
-    if (
-      !accommodation ||
-      !checkIn ||
-      !checkOut ||
-      !guests
-    ) {
-      return res.status(400).json({
-        message:
-          "Please provide accommodation, check-in, check-out, and guests",
-      });
-    }
+// Minimum gap required between one guest's checkout and the next guest's
+// check-in on the same listing — 1 full day buffer for cleaning/turnover.
+const CLEANING_BUFFER_DAYS = 1;
+const BUFFER_MS = CLEANING_BUFFER_DAYS * MS_PER_NIGHT;
 
-    const selectedAccommodation =
-      await Accommodation.findById(accommodation);
+// Recomputes the cost breakdown server-side from the accommodation's own
+// fees rather than trusting a total sent by the client.
+const calculateCost = (accommodation, checkIn, checkOut) => {
+  const totalNights = Math.round((new Date(checkOut) - new Date(checkIn)) / MS_PER_NIGHT);
 
-    if (!selectedAccommodation) {
-      return res.status(404).json({
-        message: "Accommodation not found",
-      });
-    }
+  if (totalNights <= 0) {
+    const err = new Error('checkOut must be after checkIn');
+    err.statusCode = 400;
+    throw err;
+  }
 
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
+  const { price, weeklyDiscount = 0, cleaningFee = 0, serviceFee = 0, occupancyTaxes = 0 } =
+    accommodation;
 
-    if (
-      Number.isNaN(checkInDate.getTime()) ||
-      Number.isNaN(checkOutDate.getTime())
-    ) {
-      return res.status(400).json({
-        message:
-          "Please provide valid reservation dates",
-      });
-    }
+  let subtotal = price * totalNights;
 
-    if (checkOutDate <= checkInDate) {
-      return res.status(400).json({
-        message:
-          "Check-out date must be after check-in date",
-      });
-    }
+  // Apply the weekly discount (stored as a percentage) once a stay hits 7+ nights
+  const discountAmount = totalNights >= 7 ? subtotal * (weeklyDiscount / 100) : 0;
+  subtotal -= discountAmount;
 
-    const guestCount = Number(guests);
+  const totalCost = subtotal + cleaningFee + serviceFee + occupancyTaxes;
 
-    if (
-      !Number.isInteger(guestCount) ||
-      guestCount < 1
-    ) {
-      return res.status(400).json({
-        message: "Guests must be at least 1",
-      });
-    }
+  return {
+    nightlyPrice: price,
+    totalNights,
+    weeklyDiscount,
+    cleaningFee,
+    serviceFee,
+    occupancyTaxes,
+    totalCost: Math.round(totalCost * 100) / 100,
+  };
+};
 
-    if (
-      guestCount >
-      selectedAccommodation.maxGuests
-    ) {
-      return res.status(400).json({
-        message: `This accommodation allows a maximum of ${selectedAccommodation.maxGuests} guests`,
-      });
-    }
+// @desc    Create a reservation
+// @route   POST /api/reservations
+// @access  Private
+const createReservation = asyncHandler(async (req, res) => {
+  const { accommodationId, checkIn, checkOut, guests } = req.body;
 
-    // Check whether the accommodation is already booked
-    // for any overlapping confirmed reservation
-    const conflictingReservation =
-      await Reservation.findOne({
-        accommodation,
-        status: "confirmed",
-        checkIn: {
-          $lt: checkOutDate,
+  if (!accommodationId || !checkIn || !checkOut || !guests) {
+    res.status(400);
+    throw new Error('accommodationId, checkIn, checkOut and guests are required');
+  }
+
+  const accommodation = await Accommodation.findById(accommodationId);
+  if (!accommodation) {
+    res.status(404);
+    throw new Error('Accommodation not found');
+  }
+
+  if (guests > accommodation.guests) {
+    res.status(400);
+    throw new Error(`This listing sleeps a maximum of ${accommodation.guests} guests`);
+  }
+
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+
+  // Pre-generate the id so the same ObjectId tags both the hold we place on
+  // the Accommodation doc below and the Reservation we create afterwards.
+  const reservationId = new mongoose.Types.ObjectId();
+
+  // --- Concurrency control: prevent double bookings ---
+  // Single atomic findOneAndUpdate: checks overlap AND claims dates in one step.
+  // MongoDB serializes writes to a single document, so only one of two
+  // simultaneous requests for conflicting dates can win.
+  const claimed = await Accommodation.findOneAndUpdate(
+    {
+      _id: accommodationId,
+      bookedDates: {
+        $not: {
+          $elemMatch: {
+            checkIn: { $lt: new Date(checkOutDate.getTime() + BUFFER_MS) },
+            checkOut: { $gt: new Date(checkInDate.getTime() - BUFFER_MS) },
+          },
         },
-        checkOut: {
-          $gt: checkInDate,
-        },
-      });
+      },
+    },
+    {
+      $push: {
+        bookedDates: { checkIn: checkInDate, checkOut: checkOutDate, reservation: reservationId },
+      },
+    },
+    { new: true }
+  );
 
-    if (conflictingReservation) {
-      return res.status(409).json({
-        message:
-          "Accommodation is not available for the selected dates",
-      });
-    }
-
-    const millisecondsPerDay =
-      1000 * 60 * 60 * 24;
-
-    const nights = Math.ceil(
-      (checkOutDate - checkInDate) /
-        millisecondsPerDay
+  if (!claimed) {
+    res.status(409);
+    throw new Error(
+      'Those dates are unavailable — either already booked or too close to another booking for turnover/cleaning. Please choose different dates.'
     );
-
-    const totalPrice =
-      nights * selectedAccommodation.price;
-
-    const newReservation =
-      await Reservation.create({
-        user: req.user.id,
-        accommodation,
-        checkIn: checkInDate,
-        checkOut: checkOutDate,
-        guests: guestCount,
-        totalPrice,
-        status: "confirmed",
-      });
-
-    res.status(201).json({
-      message:
-        "Reservation created successfully",
-      reservation: newReservation,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
   }
-};
 
-// Get reservations for the logged-in user
-const getMyReservations = async (req, res) => {
   try {
-    const reservations =
-      await Reservation.find({
-        user: req.user.id,
-      }).populate("accommodation");
+    const costBreakdown = calculateCost(claimed, checkIn, checkOut);
 
-    res.status(200).json(reservations);
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
+    const reservation = await Reservation.create({
+      _id: reservationId,
+      accommodation: claimed._id,
+      host: claimed.host,
+      user: req.user._id,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+      guests,
+      ...costBreakdown,
     });
+
+    res.status(201).json(reservation);
+  } catch (err) {
+    // Release the hold if anything after the claim fails.
+    await Accommodation.updateOne(
+      { _id: accommodationId },
+      { $pull: { bookedDates: { reservation: reservationId } } }
+    );
+    throw err;
   }
-};
+});
 
-// Get one reservation by ID
-const getReservationById = async (
-  req,
-  res
-) => {
-  try {
-    const reservation =
-      await Reservation.findById(
-        req.params.id
-      ).populate("accommodation");
+// @desc    Get all reservations for listings owned by the logged-in host
+// @route   GET /api/reservations/host
+// @access  Private (host)
+const getReservationsByHost = asyncHandler(async (req, res) => {
+  const reservations = await Reservation.find({ host: req.user._id })
+    .populate('accommodation', 'title location images')
+    .populate('user', 'username')
+    .sort({ createdAt: -1 });
 
-    if (!reservation) {
-      return res.status(404).json({
-        message: "Reservation not found",
-      });
-    }
+  res.json(reservations);
+});
 
-    if (
-      reservation.user.toString() !==
-      req.user.id
-    ) {
-      return res.status(403).json({
-        message:
-          "Not authorized to view this reservation",
-      });
-    }
+// @desc    Get all reservations made by the logged-in user
+// @route   GET /api/reservations/user
+// @access  Private
+const getReservationsByUser = asyncHandler(async (req, res) => {
+  const reservations = await Reservation.find({ user: req.user._id })
+    .populate('accommodation', 'title location images')
+    .sort({ createdAt: -1 });
 
-    res.status(200).json(reservation);
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  res.json(reservations);
+});
+
+// @desc    Delete/cancel a reservation
+// @route   DELETE /api/reservations/:id
+// @access  Private (the user who booked it, or the host it belongs to)
+const deleteReservation = asyncHandler(async (req, res) => {
+  const reservation = await Reservation.findById(req.params.id);
+
+  if (!reservation) {
+    res.status(404);
+    throw new Error('Reservation not found');
   }
-};
 
-// Cancel a reservation
-const cancelReservation = async (
-  req,
-  res
-) => {
-  try {
-    const reservation =
-      await Reservation.findById(
-        req.params.id
-      );
+  const isOwner = reservation.user.toString() === req.user._id.toString();
+  const isHost = reservation.host.toString() === req.user._id.toString();
 
-    if (!reservation) {
-      return res.status(404).json({
-        message: "Reservation not found",
-      });
-    }
-
-    if (
-      reservation.user.toString() !==
-      req.user.id
-    ) {
-      return res.status(403).json({
-        message:
-          "Not authorized to cancel this reservation",
-      });
-    }
-
-    reservation.status = "cancelled";
-
-    await reservation.save();
-
-    res.status(200).json({
-      message:
-        "Reservation cancelled successfully",
-      reservation,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  if (!isOwner && !isHost) {
+    res.status(403);
+    throw new Error('Not authorized to cancel this reservation');
   }
-};
 
-// Get all reservations - admin only
-const getAllReservations = async (
-  req,
-  res
-) => {
-  try {
-    const reservations =
-      await Reservation.find()
-        .populate(
-          "user",
-          "username email"
-        )
-        .populate("accommodation");
+  await reservation.deleteOne();
 
-    res.status(200).json(reservations);
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
-  }
-};
+  // Free up the dates on the listing so other guests can book them again.
+  await Accommodation.updateOne(
+    { _id: reservation.accommodation },
+    { $pull: { bookedDates: { reservation: reservation._id } } }
+  );
+
+  res.json({ message: 'Reservation cancelled', id: req.params.id });
+});
 
 module.exports = {
   createReservation,
-  getMyReservations,
-  getReservationById,
-  cancelReservation,
-  getAllReservations,
+  getReservationsByHost,
+  getReservationsByUser,
+  deleteReservation,
 };

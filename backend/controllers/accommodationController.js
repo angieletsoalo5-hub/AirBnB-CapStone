@@ -1,269 +1,124 @@
-const Accommodation = require("../models/Accommodation");
-const Reservation = require("../models/Reservation");
+const Accommodation = require('../models/Accommodation');
+const asyncHandler = require('../utils/asyncHandler');
 
-// Create a new accommodation
-const createAccommodation = async (req, res) => {
-  try {
-    const {
-      title,
-      description,
-      location,
-      type,
-      price,
-      images,
-      amenities,
-      maxGuests,
-      bedrooms,
-      bathrooms,
-      weeklyDiscount,
-      cleaningFee,
-      serviceFee,
-      occupancyTaxes,
-    } = req.body;
+// Helper: merge URL-string images (from the form's existingImages JSON field)
+// with any physically uploaded files (req.files from Multer).
+function buildImages(req) {
+  let images = [];
 
-    const newAccommodation = await Accommodation.create({
-      title,
-      description,
-      location,
-      type,
-      price,
-      images,
-      amenities,
-      maxGuests,
-      bedrooms,
-      bathrooms,
-      weeklyDiscount,
-      cleaningFee,
-      serviceFee,
-      occupancyTaxes,
-      host: req.user.id,
-    });
-
-    res.status(201).json({
-      message: "Accommodation created successfully",
-      accommodation: newAccommodation,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  if (req.body.existingImages) {
+    try {
+      const parsed = JSON.parse(req.body.existingImages);
+      if (Array.isArray(parsed)) images = parsed;
+    } catch (_) {
+      if (req.body.existingImages) images = [req.body.existingImages];
+    }
   }
-};
 
-// Get all accommodations
-const getAccommodations = async (req, res) => {
-  try {
-    const accommodations = await Accommodation.find().populate(
-      "host",
-      "username email"
-    );
-
-    res.status(200).json(accommodations);
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  if (req.files && req.files.length > 0) {
+    const uploadedUrls = req.files.map((f) => `/uploads/${f.filename}`);
+    images = [...images, ...uploadedUrls];
   }
-};
 
-// Get available accommodations for selected dates
-const getAvailableAccommodations = async (req, res) => {
-  try {
-    const { checkIn, checkOut } = req.query;
+  return images;
+}
 
-    if (!checkIn || !checkOut) {
-      return res.status(400).json({
-        message: "Please provide check-in and check-out dates",
-      });
-    }
+// @desc    Create a new accommodation listing
+// @route   POST /api/accommodations
+// @access  Private (host)
+const createAccommodation = asyncHandler(async (req, res) => {
+  const images = buildImages(req);
 
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
+  const accommodation = await Accommodation.create({
+    ...req.body,
+    ...(images.length > 0 && { images }),
+    host: req.user._id,
+  });
 
-    if (
-      Number.isNaN(checkInDate.getTime()) ||
-      Number.isNaN(checkOutDate.getTime())
-    ) {
-      return res.status(400).json({
-        message: "Please provide valid dates",
-      });
-    }
+  res.status(201).json(accommodation);
+});
 
-    if (checkOutDate <= checkInDate) {
-      return res.status(400).json({
-        message: "Check-out date must be after check-in date",
-      });
-    }
+// @desc    Get all accommodations, optionally filtered by location and host
+// @route   GET /api/accommodations?location=New York&host=<id>
+// @access  Public
+const getAccommodations = asyncHandler(async (req, res) => {
+  const filter = {};
 
-    const overlappingReservations = await Reservation.find({
-      status: "confirmed",
-      checkIn: { $lt: checkOutDate },
-      checkOut: { $gt: checkInDate },
-    }).select("accommodation");
-
-    const bookedAccommodationIds =
-      overlappingReservations.map(
-        (reservation) => reservation.accommodation
-      );
-
-    const availableAccommodations =
-      await Accommodation.find({
-        _id: { $nin: bookedAccommodationIds },
-      }).populate("host", "username email");
-
-    res.status(200).json(availableAccommodations);
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  if (req.query.location) {
+    filter.location = { $regex: req.query.location, $options: 'i' };
   }
-};
 
-// Get one accommodation by ID
-const getAccommodationById = async (req, res) => {
-  try {
-    const accommodation =
-      await Accommodation.findById(
-        req.params.id
-      ).populate("host", "username email");
-
-    if (!accommodation) {
-      return res.status(404).json({
-        message: "Accommodation not found",
-      });
-    }
-
-    res.status(200).json(accommodation);
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  if (req.query.host) {
+    filter.host = req.query.host;
   }
-};
 
-// Update an accommodation
-const updateAccommodation = async (req, res) => {
-  try {
-    const accommodation =
-      await Accommodation.findById(req.params.id);
+  const accommodations = await Accommodation.find(filter).sort({ createdAt: -1 });
+  res.json(accommodations);
+});
 
-    if (!accommodation) {
-      return res.status(404).json({
-        message: "Accommodation not found",
-      });
-    }
+// @desc    Get a single accommodation by id
+// @route   GET /api/accommodations/:id
+// @access  Public
+const getAccommodationById = asyncHandler(async (req, res) => {
+  const accommodation = await Accommodation.findById(req.params.id)
+    .populate('host', 'username createdAt');
 
-    // Allow the listing host or an admin to update it
-    if (
-      accommodation.host.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
-      return res.status(403).json({
-        message:
-          "Not authorized to update this accommodation",
-      });
-    }
-
-    const {
-      title,
-      description,
-      location,
-      type,
-      price,
-      images,
-      amenities,
-      maxGuests,
-      bedrooms,
-      bathrooms,
-      weeklyDiscount,
-      cleaningFee,
-      serviceFee,
-      occupancyTaxes,
-    } = req.body;
-
-    const updatedAccommodation =
-      await Accommodation.findByIdAndUpdate(
-        req.params.id,
-        {
-          title,
-          description,
-          location,
-          type,
-          price,
-          images,
-          amenities,
-          maxGuests,
-          bedrooms,
-          bathrooms,
-          weeklyDiscount,
-          cleaningFee,
-          serviceFee,
-          occupancyTaxes,
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-
-    res.status(200).json({
-      message: "Accommodation updated successfully",
-      accommodation: updatedAccommodation,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  if (!accommodation) {
+    res.status(404);
+    throw new Error('Accommodation not found');
   }
-};
 
-// Delete an accommodation
-const deleteAccommodation = async (req, res) => {
-  try {
-    const accommodation =
-      await Accommodation.findById(req.params.id);
+  res.json(accommodation);
+});
 
-    if (!accommodation) {
-      return res.status(404).json({
-        message: "Accommodation not found",
-      });
-    }
+// @desc    Update an accommodation listing
+// @route   PUT /api/accommodations/:id
+// @access  Private (host who owns the listing)
+const updateAccommodation = asyncHandler(async (req, res) => {
+  const accommodation = await Accommodation.findById(req.params.id);
 
-    // Allow the listing host or an admin to delete it
-    if (
-      accommodation.host.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
-      return res.status(403).json({
-        message:
-          "Not authorized to delete this accommodation",
-      });
-    }
-
-    await Accommodation.findByIdAndDelete(
-      req.params.id
-    );
-
-    res.status(200).json({
-      message: "Accommodation deleted successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  if (!accommodation) {
+    res.status(404);
+    throw new Error('Accommodation not found');
   }
-};
+
+  if (accommodation.host.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorized to update this listing');
+  }
+
+  const images = buildImages(req);
+  Object.assign(accommodation, req.body);
+  if (images.length > 0) accommodation.images = images;
+
+  const updated = await accommodation.save();
+
+  res.json(updated);
+});
+
+// @desc    Delete an accommodation listing
+// @route   DELETE /api/accommodations/:id
+// @access  Private (host who owns the listing)
+const deleteAccommodation = asyncHandler(async (req, res) => {
+  const accommodation = await Accommodation.findById(req.params.id);
+
+  if (!accommodation) {
+    res.status(404);
+    throw new Error('Accommodation not found');
+  }
+
+  if (accommodation.host.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorized to delete this listing');
+  }
+
+  await accommodation.deleteOne();
+  res.json({ message: 'Accommodation removed', id: req.params.id });
+});
 
 module.exports = {
   createAccommodation,
   getAccommodations,
-  getAvailableAccommodations,
   getAccommodationById,
   updateAccommodation,
   deleteAccommodation,

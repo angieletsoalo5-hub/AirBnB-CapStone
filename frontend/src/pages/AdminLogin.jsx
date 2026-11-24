@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { loginUser } from "../services/api.js";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function AdminLogin() {
   const navigate = useNavigate();
+  const { login, logout } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,19 +23,13 @@ function AdminLogin() {
       setLoading(true);
       setMessage("");
 
-      const data = await loginUser(email, password);
+      const user = await login(email.trim(), password);
 
-      if (!data.user || data.user.role !== "admin") {
-        setMessage("Admin access only.");
+      if (user.role !== "host") {
+        logout();
+        setMessage("Host access only. Sign in with a host account.");
         return;
       }
-
-      localStorage.setItem("token", data.token);
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
 
       navigate("/admin");
     } catch (error) {
@@ -48,7 +43,8 @@ function AdminLogin() {
     <main className="admin-login-page">
       <div className="admin-login-card">
         <div className="admin-login-logo">
-          airbnb
+          <img src="/favicon.svg" alt="" aria-hidden="true" />
+          <span>airbnb</span>
         </div>
 
         <h1>Admin Login</h1>
@@ -102,6 +98,9 @@ function AdminLogin() {
               : "Login"}
           </button>
         </form>
+        <Link to="/login" className="admin-login-guest-link">
+          Back to guest login
+        </Link>
       </div>
     </main>
   );

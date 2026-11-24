@@ -1,141 +1,136 @@
-import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
-import {
-  getMyReservations,
-  cancelReservation,
-} from "../services/api.js";
+import { useEffect, useState } from 'react';
+import { Navigate, Link } from 'react-router-dom';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
+import { api } from '../api/client';
+import './Reservations.css';
 
-function Reservations() {
+const PLACEHOLDER = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&q=80';
+
+function fmt(n) { return Number(n || 0).toLocaleString('en-ZA'); }
+
+function fmtDate(iso) {
+  return new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function nightsBetween(checkIn, checkOut) {
+  const ms = new Date(checkOut) - new Date(checkIn);
+  return Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)));
+}
+
+export default function Reservations() {
+  const { user, token, loading: authLoading } = useAuth();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
-    const loadReservations = async () => {
-      try {
-        const data = await getMyReservations();
-        setReservations(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!token) return;
+    api
+      .getMyReservations(token)
+      .then((data) => setReservations(Array.isArray(data) ? data : []))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [token]);
 
-    loadReservations();
-  }, []);
-
-  const handleCancel = async (reservationId) => {
+  async function handleCancel(id) {
+    if (!window.confirm('Are you sure you want to cancel this reservation?')) return;
+    setCancellingId(id);
     try {
-      setCancellingId(reservationId);
-      setError("");
-
-      const updatedReservation =
-        await cancelReservation(reservationId);
-
-      setReservations((currentReservations) =>
-        currentReservations.map((reservation) =>
-          reservation._id === reservationId
-            ? updatedReservation
-            : reservation
-        )
-      );
-    } catch (error) {
-      setError(error.message);
+      await api.cancelReservation(id, token);
+      setReservations((prev) => prev.filter((r) => r._id !== id));
+    } catch (err) {
+      setError(err.message);
     } finally {
       setCancellingId(null);
     }
-  };
+  }
+
+  if (!authLoading && !user) return <Navigate to="/login" replace />;
 
   return (
-    <div>
-      <Navbar />
+    <div className="reservations-page">
+      <Header />
 
-      <main className="reservations-page">
-        <h1>My Reservations</h1>
+      <main className="container reservations-main">
+        <h1 className="reservations-title">My Trips</h1>
 
-        {loading && <p>Loading reservations...</p>}
-
-        {error && (
-          <p className="reservations-error">
-            {error}
-          </p>
+        {loading && (
+          <div className="reservations-status" aria-live="polite">
+            <div className="spinner" aria-hidden="true" />
+            <p>Loading your trips…</p>
+          </div>
         )}
 
-        {!loading &&
-          !error &&
-          reservations.length === 0 && (
-            <p>You do not have any reservations yet.</p>
-          )}
+        {!loading && error && (
+          <div className="reservations-status reservations-status--error" role="alert">
+            <p>{error}</p>
+          </div>
+        )}
 
-        <div className="reservations-list">
-          {reservations.map((reservation) => (
-            <div
-              className="reservation-card"
-              key={reservation._id}
-            >
-              <h2>
-                {reservation.accommodation?.title ||
-                  "Accommodation"}
-              </h2>
+        {!loading && !error && reservations.length === 0 && (
+          <div className="reservations-empty">
+            <div className="reservations-empty__icon" aria-hidden="true"></div>
+            <h2 className="reservations-empty__title">No trips booked…yet!</h2>
+            <p className="reservations-empty__subtitle">Time to dust off your bags and start planning your next adventure.</p>
+            <Link to="/locations" className="btn btn-dark reservations-empty__btn">Start searching</Link>
+          </div>
+        )}
 
-              <p>
-                <strong>Location:</strong>{" "}
-                {reservation.accommodation?.location ||
-                  "Not available"}
-              </p>
+        {!loading && !error && reservations.length > 0 && (
+          <div className="reservations-grid" aria-label="Your reservations">
+            {reservations.map((r) => {
+              const acc = r.accommodation;
+              const image = acc?.images?.[0] || PLACEHOLDER;
+              const nights = nightsBetween(r.checkIn, r.checkOut);
+              const total = r.totalCost ?? r.totalPrice;
 
-              <p>
-                <strong>Check in:</strong>{" "}
-                {new Date(
-                  reservation.checkIn
-                ).toLocaleDateString()}
-              </p>
+              return (
+                <article key={r._id} className="reservation-card">
+                  <Link to={acc?._id ? `/locations/${acc._id}` : '#'} className="reservation-card__img-link" tabIndex={-1} aria-hidden="true">
+                    <img src={image} alt={acc?.title ?? 'Property'} className="reservation-card__img" loading="lazy" />
+                  </Link>
 
-              <p>
-                <strong>Check out:</strong>{" "}
-                {new Date(
-                  reservation.checkOut
-                ).toLocaleDateString()}
-              </p>
+                  <div className="reservation-card__body">
+                    <p className="reservation-card__location">{acc?.location ?? '—'}</p>
+                    <h3 className="reservation-card__title">
+                      <Link to={acc?._id ? `/locations/${acc._id}` : '#'} className="reservation-card__title-link">
+                        {acc?.title ?? 'Listing no longer available'}
+                      </Link>
+                    </h3>
 
-              <p>
-                <strong>Guests:</strong>{" "}
-                {reservation.guests}
-              </p>
+                    <div className="reservation-card__dates">
+                      <div className="reservation-card__date-block">
+                        <span className="reservation-card__date-label">Check-in</span>
+                        <span className="reservation-card__date-value">{fmtDate(r.checkIn)}</span>
+                      </div>
+                      <span className="reservation-card__date-arrow" aria-hidden="true">→</span>
+                      <div className="reservation-card__date-block">
+                        <span className="reservation-card__date-label">Checkout</span>
+                        <span className="reservation-card__date-value">{fmtDate(r.checkOut)}</span>
+                      </div>
+                    </div>
 
-              <p>
-                <strong>Total:</strong> R
-                {reservation.totalPrice}
-              </p>
-
-              <p>
-                <strong>Status:</strong>{" "}
-                {reservation.status}
-              </p>
-
-              {reservation.status === "confirmed" && (
-                <button
-                  className="cancel-reservation-button"
-                  onClick={() =>
-                    handleCancel(reservation._id)
-                  }
-                  disabled={
-                    cancellingId === reservation._id
-                  }
-                >
-                  {cancellingId === reservation._id
-                    ? "Cancelling..."
-                    : "Cancel Reservation"}
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
+                    <div className="reservation-card__footer">
+                      <div className="reservation-card__cost">
+                        {nights > 0 && <p className="reservation-card__nights">{nights} night{nights !== 1 ? 's' : ''}</p>}
+                        {total != null && <p className="reservation-card__total">Total: <strong>R{fmt(total)}</strong></p>}
+                      </div>
+                      <button className="btn btn-outline reservation-card__cancel" onClick={() => handleCancel(r._id)} disabled={cancellingId === r._id} aria-busy={cancellingId === r._id}>
+                        {cancellingId === r._id ? 'Cancelling…' : 'Cancel'}
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </main>
+
+      <Footer />
     </div>
   );
 }
-
-export default Reservations;

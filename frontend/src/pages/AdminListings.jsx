@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  getAccommodations,
-  deleteAccommodation,
-} from "../services/api.js";
+import { api, resolveImageUrl } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import AdminHeader from "../components/AdminHeader";
 
 function AdminListings() {
+  const { user, token } = useAuth();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -14,7 +13,7 @@ function AdminListings() {
   useEffect(() => {
     const loadListings = async () => {
       try {
-        const data = await getAccommodations();
+        const data = await api.getHostAccommodations(user._id, token);
         setListings(data);
       } catch (error) {
         setError(error.message);
@@ -24,7 +23,7 @@ function AdminListings() {
     };
 
     loadListings();
-  }, []);
+  }, [user, token]);
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
@@ -34,7 +33,7 @@ function AdminListings() {
     if (!confirmed) return;
 
     try {
-      await deleteAccommodation(id);
+      await api.deleteAccommodation(id, token);
 
       setListings((currentListings) =>
         currentListings.filter(
@@ -89,10 +88,7 @@ function AdminListings() {
               key={listing._id}
             >
               <img
-                src={
-                  listing.images?.[0] ||
-                  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80"
-                }
+                src={resolveImageUrl(listing.images?.[0]) || "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80"}
                 alt={listing.title}
                 onError={(e) => {
                   e.currentTarget.src =

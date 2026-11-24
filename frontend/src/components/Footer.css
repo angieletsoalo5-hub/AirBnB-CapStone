@@ -1,0 +1,177 @@
+/* ============================================================
+   Footer – Airbnb 4-column + bottom bar
+   ============================================================ */
+
+.site-footer {
+  background: var(--color-bg);
+  margin-top: auto;
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  padding-top: 48px;
+  padding-bottom: 40px;
+}
+
+.footer-col__heading {
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--color-text);
+  margin-bottom: 16px;
+}
+
+.footer-col__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-link {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+}
+
+.footer-link:hover {
+  color: var(--color-text);
+  text-decoration-color: currentColor;
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.footer-bottom__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 18px;
+  padding-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.footer-copyright {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.footer-bottom__link {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
+}
+
+.footer-bottom__link:hover {
+  color: var(--color-text);
+  text-decoration-color: currentColor;
+}
+
+.footer-bottom__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-locale-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: var(--radius-xs);
+  transition: background var(--transition-fast);
+}
+
+.footer-locale-btn:hover {
+  background: var(--color-bg-alt);
+  text-decoration: underline;
+}
+
+.footer-locale-btn svg { width: 16px; height: 16px; }
+.footer-language { position: relative; }
+
+.footer-language-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 300;
+  min-width: 160px;
+  padding: 8px 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elevated);
+}
+
+.footer-language-menu__item {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+
+.footer-language-menu__item:hover,
+.footer-language-menu__item--active { background: var(--color-bg-alt); }
+.footer-language-menu__item--active { font-weight: 700; }
+
+.footer-socials {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: 4px;
+  padding-left: 16px;
+  border-left: 1px solid var(--color-border);
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  transition: color var(--transition-fast);
+}
+
+.footer-social-link:hover {
+  color: var(--color-primary);
+}
+
+@media (max-width: 900px) {
+  .footer-columns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
+  .footer-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-bottom__inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

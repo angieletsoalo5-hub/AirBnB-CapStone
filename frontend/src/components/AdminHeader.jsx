@@ -1,25 +1,22 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function AdminHeader() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const user = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
-
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
+    logout();
     navigate("/admin/login");
   };
 
   return (
     <header className="admin-header">
-      <Link to="/admin" className="admin-logo">
-        airbnb
+      <Link to="/admin" className="admin-logo" aria-label="Airbnb host dashboard">
+        <img src="/favicon.svg" alt="" aria-hidden="true" />
+        <span>airbnb</span>
       </Link>
 
       <nav className="admin-navigation">
@@ -31,6 +28,9 @@ function AdminHeader() {
 
         <Link to="/admin/create-listing">
           Create Listing
+        </Link>
+        <Link to="/admin/reservations">
+          Reservations
         </Link>
       </nav>
 

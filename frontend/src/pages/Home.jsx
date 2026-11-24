@@ -1,568 +1,228 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import { getAccommodations } from "../services/api.js";
-import { getListingRating } from "../utils/ratings.js";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import './Home.css';
 
-const fallbackImage =
-  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80";
+const INSPIRATION_CARDS = [
+  { id: 1, city: 'Sandton City Hotel', time: '53 km away', location: 'Johannesburg', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/891680884.jpg?k=6df3be913d6b5dc2160b4ec5e499d5fe369b78a728db11e7b559ef367f7a8a01&o=' },
+  { id: 2, city: 'Joburg City Hotel', time: '168 km away', location: 'Johannesburg', image: 'https://z.cdrst.com/foto/hotel-sf/394bf/granderesp/city-lodge-hotel-fourways-general-11fe9517.jpg' },
+  { id: 3, city: 'Woodmead Hotel', time: '30 miles away', location: 'Johannesburg', image: 'https://www.hilton.com/im/en/JNBTHLX/27853593/213036544-koo9jcakxdergzpah6a-nightime-houghton-exterior-o.jpg?impolicy=crop&cw=5000&ch=3333&gravity=NorthWest&xposition=0&yposition=205&rw=640&rh=427' },
+  { id: 4, city: 'Hyde Park Hotel', time: '34 km away', location: 'Johannesburg', image: 'https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlmIsp5RQ9-yxmH2Y3VpoL2Hpp34T2JMzt6vpBgzifOQwJlEov8rrMIx701tmk7VmrXzUSqyhRfhsf5iP8I_pRTWS7icDoz9QDPMjutVgr_JnBybty2M3LsLp1I-lg_ZdOIAbvZTQ=s1360-w1360-h1020-rw' },
+  { id: 5, city: 'Cape Town Waterfront', time: '1 hour away', location: 'Cape Town', image: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600&q=80' },
+  { id: 6, city: 'Stellenbosch Manor', time: '1.5 hours away', location: 'Stellenbosch', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCX0GBwJgKMvG066pUixt71kius-G3fE9KAWxEgwcwkFWTyyzsURHkP9E&s=10' },
+  { id: 7, city: 'Durban Beachfront', time: '3 hours away', location: 'Durban', image: 'https://turntable.kagiso.io/images/dbn_beach_frnt.2e16d0ba.fill-800x600.jpg' },
+  { id: 8, city: 'Clifton Beach House', time: '5 hours away', location: 'Cape Town', image: 'https://businesstech.co.za/news/wp-content/uploads/2021/10/Clifton8-e1635416105968.png' },
+];
 
-const heroImage =
-  "https://images.unsplash.com/photo-1706808849780-7a04fbac83ef?q=80&w=2532&auto=format&fit=crop&ixlib=rb-4.1.0";
+const INSPIRATION_COLORS = ['#E31C5F', '#B0219E', '#E1264A', '#E0562C'];
 
-function Home() {
+const GETAWAY_TABS = [
+  'Destinations for arts & culture',
+  'Destinations for outdoor adventure',
+  'Mountain cabins',
+  'Beach destinations',
+  'Popular destinations',
+  'Unique Stays',
+];
+
+const GETAWAY_DESTINATIONS = {
+  'Destinations for arts & culture': [
+    { id: 1, city: 'Phoenix', country: 'Arizona' },
+    { id: 2, city: 'Hot Springs', country: 'Arkansas' },
+    { id: 3, city: 'Los Angeles', country: 'California' },
+    { id: 4, city: 'San Diego', country: 'California' },
+    { id: 5, city: 'San Francisco', country: 'California' },
+    { id: 6, city: 'Barcelona', country: 'Catalonia' },
+    { id: 7, city: 'Prague', country: 'Czechia' },
+    { id: 8, city: 'Washington', country: 'District of Columbia' },
+    { id: 9, city: 'Keswick', country: 'England' },
+    { id: 10, city: 'London', country: 'England' },
+    { id: 11, city: 'Scarborough', country: 'England' },
+    { id: 12, city: 'Johannesburg', country: 'Gauteng' },
+    { id: 13, city: 'Cape Town', country: 'Western Cape' },
+    { id: 14, city: 'Pretoria', country: 'Gauteng' },
+  ],
+  'Destinations for outdoor adventure': [
+    { id: 15, city: 'Drakensberg', country: 'KwaZulu-Natal' },
+    { id: 16, city: 'Kruger', country: 'Mpumalanga' },
+    { id: 17, city: 'Tsitsikamma', country: 'Eastern Cape' },
+    { id: 18, city: 'Pilanesberg', country: 'North West' },
+  ],
+  'Mountain cabins': [
+    { id: 19, city: 'Dullstroom', country: 'Mpumalanga' },
+    { id: 20, city: 'Clarens', country: 'Free State' },
+    { id: 21, city: 'Hazyview', country: 'Limpopo' },
+    { id: 22, city: 'Swellendam', country: 'Western Cape' },
+  ],
+  'Beach destinations': [
+    { id: 23, city: 'Umhlanga', country: 'KwaZulu-Natal' },
+    { id: 24, city: 'Clifton', country: 'Western Cape' },
+    { id: 25, city: 'Hermanus', country: 'Western Cape' },
+    { id: 26, city: 'Plettenberg Bay', country: 'Western Cape' },
+  ],
+  'Popular destinations': [
+    { id: 27, city: 'Johannesburg', country: 'Gauteng' },
+    { id: 28, city: 'Cape Town', country: 'Western Cape' },
+    { id: 29, city: 'Durban', country: 'KwaZulu-Natal' },
+    { id: 30, city: 'Phoenix', country: 'Arizona' },
+    { id: 31, city: 'Los Angeles', country: 'California' },
+    { id: 32, city: 'San Diego', country: 'California' },
+    { id: 33, city: 'San Francisco', country: 'California' },
+    { id: 34, city: 'Hot Springs', country: 'Arkansas' },
+  ],
+  'Unique Stays': [
+    { id: 35, city: 'Franschhoek', country: 'Western Cape' },
+    { id: 36, city: 'Mossel Bay', country: 'Western Cape' },
+    { id: 37, city: 'Knysna', country: 'Western Cape' },
+    { id: 38, city: 'Bloemfontein', country: 'Free State' },
+  ],
+};
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState(GETAWAY_TABS[0]);
+  const [showAllGetaways, setShowAllGetaways] = useState(false);
   const navigate = useNavigate();
 
-  const [accommodations, setAccommodations] = useState([]);
+  function handleFilter(location) {
+    navigate(`/locations?location=${encodeURIComponent(location)}`);
+  }
 
-  const [searchLocation, setSearchLocation] = useState("");
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guestCount, setGuestCount] = useState("");
-
-  const [searchError, setSearchError] = useState("");
-
-  useEffect(() => {
-    const loadAccommodations = async () => {
-      try {
-        const data = await getAccommodations();
-        setAccommodations(data);
-      } catch (error) {
-        console.error(
-          "Error loading accommodations:",
-          error
-        );
-      }
-    };
-
-    loadAccommodations();
-  }, []);
-
-  const handleSearch = () => {
-    setSearchError("");
-
-    if (
-      (checkIn && !checkOut) ||
-      (!checkIn && checkOut)
-    ) {
-      setSearchError(
-        "Please select both check-in and check-out dates."
-      );
-      return;
-    }
-
-    if (
-      checkIn &&
-      checkOut &&
-      new Date(checkOut) <= new Date(checkIn)
-    ) {
-      setSearchError(
-        "Check-out date must be after check-in date."
-      );
-      return;
-    }
-
-    const params = new URLSearchParams();
-
-    if (searchLocation.trim()) {
-      params.set("location", searchLocation.trim());
-    }
-
-    if (checkIn) {
-      params.set("checkIn", checkIn);
-    }
-
-    if (checkOut) {
-      params.set("checkOut", checkOut);
-    }
-
-    if (guestCount) {
-      params.set("guests", guestCount);
-    }
-
-    const queryString = params.toString();
-
-    navigate(
-      queryString
-        ? `/search?${queryString}`
-        : "/search"
-    );
-  };
-
-  const handleFlexibleSearch = () => {
-    navigate("/search");
-  };
+  const destinations = GETAWAY_DESTINATIONS[activeTab];
+  const visibleDests = showAllGetaways ? destinations : destinations.slice(0, 12);
 
   return (
-    <div className="airbnb-home">
-      <Navbar />
+    <div className="home-page">
 
-      <main className="home-page">
-        {/* HERO */}
-        <section className="hero-section">
-          <div className="hero-content">
-            <p className="hero-eyebrow">
-              FIND YOUR PERFECT GETAWAY
-            </p>
+      {/* 1. Hero */}
+      <section className="hero" aria-label="Hero banner">
+        <Header onFilter={handleFilter} transparent />
+        <div className="hero-bg">
+          <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1800&q=90" alt="Modern luxury home" className="hero-image" />
+          <div className="hero-overlay" aria-hidden="true" />
+        </div>
+        <div className="hero-content">
+          <p className="hero-tagline">Not sure where to go? Perfect.</p>
+          <button className="btn hero-flexible-btn" onClick={() => navigate('/locations')}>
+            I&rsquo;m flexible
+          </button>
+        </div>
+      </section>
 
-            <h1>Find your next stay</h1>
-
-            <p className="hero-subtitle">
-              Search unique homes, stays and experiences
-              for your next trip.
-            </p>
-          </div>
-
-          {/* SEARCH */}
-          <div className="search-bar">
-            <div className="search-item">
-              <span>Where</span>
-
-              <input
-                type="text"
-                placeholder="Search destinations"
-                value={searchLocation}
-                onChange={(e) =>
-                  setSearchLocation(e.target.value)
-                }
-              />
-            </div>
-
-            <div className="search-item">
-              <span>Check in</span>
-
-              <input
-                type="date"
-                value={checkIn}
-                onChange={(e) =>
-                  setCheckIn(e.target.value)
-                }
-              />
-            </div>
-
-            <div className="search-item">
-              <span>Check out</span>
-
-              <input
-                type="date"
-                value={checkOut}
-                onChange={(e) =>
-                  setCheckOut(e.target.value)
-                }
-              />
-            </div>
-
-            <div className="search-item">
-              <span>Who</span>
-
-              <input
-                type="number"
-                min="1"
-                placeholder="Add guests"
-                value={guestCount}
-                onChange={(e) =>
-                  setGuestCount(e.target.value)
-                }
-              />
-            </div>
-
-            <button
-              className="search-button"
-              type="button"
-              onClick={handleSearch}
+      {/* 2. Inspiration Cards */}
+      <section className="section inspiration-section container" aria-label="Inspiration for your next trip">
+        <h2 className="section-title">Inspiration for your next trip</h2>
+        <div className="inspiration-grid">
+          {INSPIRATION_CARDS.map((card, i) => (
+            <article
+              key={card.id}
+              className="inspiration-card"
+              onClick={() => navigate(`/locations?location=${encodeURIComponent(card.location)}`)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate(`/locations?location=${encodeURIComponent(card.location)}`)}
+              aria-label={`Explore ${card.city}`}
             >
-              Search
-            </button>
-          </div>
-
-          {searchError && (
-            <p className="search-error">
-              {searchError}
-            </p>
-          )}
-        </section>
-
-        {/* FIGMA-STYLE IMAGE HERO */}
-        <section className="home-image-hero">
-          <img
-            src={heroImage}
-            alt="Beautiful holiday home"
-          />
-
-          <div className="home-image-overlay"></div>
-
-          <div className="home-image-content">
-            <h2>Not sure where to go? Perfect.</h2>
-
-            <button
-              type="button"
-              onClick={handleFlexibleSearch}
-            >
-              I'm flexible
-            </button>
-          </div>
-        </section>
-
-        {/* AVAILABLE STAYS */}
-        <section className="listings-section home-section">
-          <div className="section-heading">
-            <div>
-              <p className="section-eyebrow">STAYS</p>
-
-              <h2>Available stays</h2>
-            </div>
-
-            <p>
-              Explore places ready for your next trip.
-            </p>
-          </div>
-
-          {accommodations.length === 0 ? (
-            <div className="no-results">
-              <h3>No stays found</h3>
-
-              <p>
-                There are currently no stays available.
-              </p>
-            </div>
-          ) : (
-            <div className="listings-grid">
-              {accommodations.map((accommodation) => (
-                <Link
-                  to={`/listing/${accommodation._id}`}
-                  className="listing-card"
-                  key={accommodation._id}
-                >
-                  <div className="listing-image-wrapper">
-                    <img
-                      src={
-                        accommodation.images?.[0] ||
-                        fallbackImage
-                      }
-                      alt={accommodation.title}
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          fallbackImage;
-                      }}
-                    />
-
-                    <span className="guest-favourite">
-                      Guest favourite
-                    </span>
-                  </div>
-
-                  <div className="listing-card-content">
-                    <div className="listing-card-title-row">
-                      <h3>{accommodation.title}</h3>
-
-                      <span>
-                          ★ {getListingRating(accommodation)}
-                      </span>
-                    </div>
-
-                    <p className="listing-location">
-                      {accommodation.location}
-                    </p>
-
-                    <p className="listing-details">
-                      {accommodation.bedrooms} bedroom
-                      {accommodation.bedrooms !== 1
-                        ? "s"
-                        : ""}{" "}
-                      · up to{" "}
-                      {accommodation.maxGuests} guests
-                    </p>
-
-                    <p className="listing-price">
-                      <strong>
-                        R{accommodation.price}
-                      </strong>{" "}
-                      night
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* INSPIRATION */}
-        <section className="home-section inspiration-section">
-          <div className="section-heading">
-            <div>
-              <p className="section-eyebrow">
-                EXPLORE
-              </p>
-
-              <h2>
-                Inspiration for your next trip
-              </h2>
-            </div>
-          </div>
-
-          <div className="inspiration-grid">
-            <article className="inspiration-card">
-              <img
-                src="https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&w=900&q=80"
-                alt="Cape Town"
-              />
-
-              <div>
-                <h3>Cape Town</h3>
-
-                <p>
-                  Mountains, beaches and city adventures.
-                </p>
+              <div className="inspiration-card__img-wrap">
+                <img src={card.image} alt={card.city} className="inspiration-card__img" loading="lazy" />
+              </div>
+              <div className="inspiration-card__body" style={{ backgroundColor: INSPIRATION_COLORS[i % INSPIRATION_COLORS.length] }}>
+                <p className="inspiration-card__city">{card.city}</p>
+                <p className="inspiration-card__time">{card.time}</p>
               </div>
             </article>
+          ))}
+        </div>
+      </section>
 
-            <article className="inspiration-card">
-              <img
-                src="https://images.unsplash.com/photo-1577948000111-9c970dfe3743?auto=format&fit=crop&w=900&q=80"
-                alt="Johannesburg"
-              />
-
-              <div>
-                <h3>Johannesburg</h3>
-
-                <p>
-                  Culture, food and unforgettable city
-                  stays.
-                </p>
-              </div>
-            </article>
-
-            <article className="inspiration-card">
-              <img
-                src="https://images.unsplash.com/photo-1596395819057-e37f55a8516b?auto=format&fit=crop&w=900&q=80"
-                alt="Durban"
-              />
-
-              <div>
-                <h3>Durban</h3>
-
-                <p>
-                  Warm beaches and relaxed coastal
-                  escapes.
-                </p>
-              </div>
-            </article>
-
-            <article className="inspiration-card">
-              <img
-                src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=900&q=80"
-                alt="Nature getaway"
-              />
-
-              <div>
-                <h3>Nature escapes</h3>
-
-                <p>
-                  Slow down and reconnect with nature.
-                </p>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        {/* EXPERIENCES */}
-        <section className="home-section experiences-section">
-          <div className="section-heading">
-            <div>
-              <p className="section-eyebrow">
-                EXPERIENCES
-              </p>
-
-              <h2>
-                Discover Airbnb experiences
-              </h2>
+      {/* 3. Discover Experiences */}
+      <section className="section experiences-section container" aria-label="Discover Airbnb Experiences">
+        <h2 className="section-title">Discover Airbnb Experiences</h2>
+        <div className="experiences-grid">
+          <article className="experience-card" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&q=80')" }}>
+            <div className="experience-card__body">
+              <h3 className="experience-card__title">Things to do on your trip</h3>
+              <button className="btn experience-card__btn" onClick={() => navigate('/locations')}>Experiences</button>
             </div>
-          </div>
-
-          <div className="experiences-grid">
-            <article className="experience-card experience-one">
-              <div className="experience-overlay">
-                <p>THINGS TO DO</p>
-
-                <h3>
-                  Discover unforgettable experiences
-                </h3>
-
-                <button type="button">
-                  Explore experiences
-                </button>
-              </div>
-            </article>
-
-            <article className="experience-card experience-two">
-              <div className="experience-overlay">
-                <p>ONLINE EXPERIENCES</p>
-
-                <h3>
-                  Connect with people from around the
-                  world
-                </h3>
-
-                <button type="button">
-                  Discover more
-                </button>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        {/* SHOP AIRBNB */}
-        <section className="home-section shop-airbnb-section">
-          <div className="shop-airbnb-content">
-            <p className="section-eyebrow">
-              SHOP AIRBNB
-            </p>
-
-            <h2>
-              Bring the Airbnb experience home
-            </h2>
-
-            <p>
-              Discover travel-inspired essentials and
-              products designed for comfortable stays.
-            </p>
-
-            <button type="button">
-              Shop now
-            </button>
-          </div>
-
-          <div className="shop-airbnb-image">
-            <img
-              src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80"
-              alt="Airbnb inspired interior"
-            />
-          </div>
-        </section>
-
-        {/* FUTURE GETAWAYS */}
-        <section className="home-section future-getaways">
-          <div className="section-heading">
-            <div>
-              <p className="section-eyebrow">
-                EXPLORE MORE
-              </p>
-
-              <h2>
-                Inspiration for future getaways
-              </h2>
+          </article>
+          <article className="experience-card" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80')" }}>
+            <div className="experience-card__body">
+              <h3 className="experience-card__title">Things to do from home</h3>
+              <button className="btn experience-card__btn" onClick={() => navigate('/locations')}>Online Experiences</button>
             </div>
+          </article>
+        </div>
+      </section>
+
+      {/* 4. Shop Gift Cards */}
+      <section className="section shop-section container" aria-label="Shop Airbnb gift cards">
+        <div className="shop-card">
+          <div className="shop-card__text">
+            <h2 className="shop-card__title">Shop Airbnb gift cards</h2>
+            <button className="btn btn-dark shop-card__btn" onClick={() => navigate('/locations')}>Learn more</button>
           </div>
-
-          <div className="future-tabs">
-            <button type="button">
-              Popular
-            </button>
-
-            <button type="button">
-              Arts & culture
-            </button>
-
-            <button type="button">
-              Outdoors
-            </button>
-
-            <button type="button">
-              Mountains
-            </button>
-
-            <button type="button">
-              Beach
-            </button>
-
-            <button type="button">
-              Unique stays
-            </button>
-          </div>
-
-          <div className="future-links-grid">
-            <div>
-              <h4>Cape Town</h4>
-              <p>Holiday rentals</p>
+          <div className="shop-card__cards-wrap" aria-hidden="true">
+            <div className="gift-card gift-card--back" />
+            <div className="gift-card gift-card--mid">
+              <svg viewBox="0 0 32 32" className="gift-card__logo" aria-hidden="true">
+                <path d="M16 1C7.163 1 0 8.163 0 17c0 5.59 2.832 10.51 7.143 13.49L16 31l8.857-.51C29.168 27.51 32 22.59 32 17 32 8.163 24.837 1 16 1z" fill="rgba(255,255,255,0.6)" />
+              </svg>
             </div>
-
-            <div>
-              <h4>Durban</h4>
-              <p>Beachfront stays</p>
+            <div className="gift-card gift-card--front">
+              <svg viewBox="0 0 32 32" className="gift-card__logo" aria-hidden="true">
+                <path d="M16 1C7.163 1 0 8.163 0 17c0 5.59 2.832 10.51 7.143 13.49L16 31l8.857-.51C29.168 27.51 32 22.59 32 17 32 8.163 24.837 1 16 1z" fill="rgba(255,255,255,0.85)" />
+              </svg>
             </div>
-
-            <div>
-              <h4>Johannesburg</h4>
-              <p>Apartment rentals</p>
-            </div>
-
-            <div>
-              <h4>Stellenbosch</h4>
-              <p>Wine country stays</p>
-            </div>
-
-            <div>
-              <h4>Knysna</h4>
-              <p>Nature getaways</p>
-            </div>
-
-            <div>
-              <h4>Hermanus</h4>
-              <p>Coastal homes</p>
-            </div>
-
-            <div>
-              <h4>Pretoria</h4>
-              <p>Weekend stays</p>
-            </div>
-
-            <div>
-              <h4>Franschhoek</h4>
-              <p>Luxury retreats</p>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* FOOTER */}
-      <footer className="airbnb-footer">
-        <div className="footer-grid">
-          <div>
-            <h4>Support</h4>
-            <p>Help Centre</p>
-            <p>AirCover</p>
-            <p>Cancellation options</p>
-            <p>Report a concern</p>
-          </div>
-
-          <div>
-            <h4>Hosting</h4>
-            <p>Airbnb your home</p>
-            <p>AirCover for Hosts</p>
-            <p>Hosting resources</p>
-            <p>Community forum</p>
-          </div>
-
-          <div>
-            <h4>Airbnb</h4>
-            <p>Newsroom</p>
-            <p>New features</p>
-            <p>Careers</p>
-            <p>Investors</p>
           </div>
         </div>
+      </section>
 
-        <div className="footer-bottom">
-          <p>
-            © 2026 Airbnb Clone · Privacy · Terms ·
-            Sitemap
-          </p>
-
-          <p>English (ZA) · ZAR</p>
+      {/* 5. Hosting Banner */}
+      <section className="hosting-banner-wrap" aria-label="Questions about hosting">
+        <div className="hosting-banner">
+          <div className="hosting-banner__bg">
+            <img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?w=1800&q=85" alt="Happy host smiling" className="hosting-banner__img" loading="lazy" />
+            <div className="hosting-banner__overlay" aria-hidden="true" />
+          </div>
+          <div className="hosting-banner__content">
+            <h2 className="hosting-banner__title">Questions<br />about<br />hosting?</h2>
+            <button className="btn hosting-banner__btn" onClick={() => navigate('/login')}>Ask a Superhost</button>
+          </div>
         </div>
-      </footer>
+      </section>
+
+      {/* 6. Future Getaways */}
+      <section className="section getaways-section container" aria-label="Inspiration for future getaways">
+        <h2 className="section-title">Inspiration for future getaways</h2>
+        <div className="getaways-tabs" role="tablist">
+          {GETAWAY_TABS.map((tab) => (
+            <button
+              key={tab}
+              className={`getaways-tab${activeTab === tab ? ' getaways-tab--active' : ''}`}
+              onClick={() => { setActiveTab(tab); setShowAllGetaways(false); }}
+              role="tab"
+              aria-selected={activeTab === tab}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        <div className="getaways-grid" role="tabpanel" aria-label={activeTab}>
+          {visibleDests.map((dest) => (
+            <button key={dest.id} className="getaway-link" onClick={() => navigate(`/locations?location=${encodeURIComponent(dest.city)}`)}>
+              <span className="getaway-link__city">{dest.city}</span>
+              <span className="getaway-link__country">{dest.country}</span>
+            </button>
+          ))}
+          {!showAllGetaways && destinations.length > 12 && (
+            <button className="getaway-link" onClick={() => setShowAllGetaways(true)}>
+              <span className="getaway-link__city getaway-link__city--underline">Show more</span>
+            </button>
+          )}
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
-
-export default Home;

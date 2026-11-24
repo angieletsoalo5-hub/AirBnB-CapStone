@@ -1,61 +1,62 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-require("dotenv").config();
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
 
-const userRoutes = require("./routes/userRoutes");
-const accommodationRoutes = require("./routes/accommodationRoutes");
-const reservationRoutes = require("./routes/reservationRoutes");
-const { protect } = require("./middleware/authMiddleware");
+const userRoutes = require('./routes/userRoutes');
+const accommodationRoutes = require('./routes/accommodationRoutes');
+const reservationRoutes = require('./routes/reservationRoutes');
+
+dotenv.config();
+connectDB();
 
 const app = express();
 
-// Middleware
+// --- Core middleware ---
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// CORS: allow the frontend origins listed in .env, comma-separated
+const allowedOrigins = (process.env.CLIENT_ORIGINS || '').split(',').map((o) => o.trim());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      // allow requests with no origin (Postman, curl, server-to-server)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
     credentials: true,
   })
 );
 
-app.use(express.json());
+// --- Static files: images uploaded via the Create/Update Listing forms ---
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
-app.use("/api/users", userRoutes);
-app.use("/api/accommodations", accommodationRoutes);
-app.use("/api/reservations", reservationRoutes);
-
-// Test route
-app.get("/", (req, res) => {
+// --- Health check ---
+app.get('/api/health', (req, res) => {
   res.json({
-    message: "Airbnb Capstone API is running",
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development',
+    uptime: Math.round(process.uptime()),
   });
 });
 
-// Protected test route
-app.get("/api/protected", protect, (req, res) => {
-  res.json({
-    message: "Protected route accessed successfully",
-    user: req.user,
-  });
+// --- Routes ---
+app.use('/api/users', userRoutes);
+app.use('/api/accommodations', accommodationRoutes);
+app.use('/api/reservations', reservationRoutes);
+
+// --- Error handling (must be registered last) ---
+app.use(notFound);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
-
-// Port
-const PORT = process.env.PORT || 5001;
-
-// Database connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected");
-
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error(
-      "MongoDB connection error:",
-      error.message
-    );
-  });

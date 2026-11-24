@@ -1,106 +1,89 @@
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const asyncHandler = require('../utils/asyncHandler');
 
-// Register a new user
-const registerUser = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+// Signs a JWT for a given user id.
+const generateToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  });
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
+// @desc    Register a new user (host or guest)
+// @route   POST /api/users/register
+// @access  Public
+const registerUser = asyncHandler(async (req, res) => {
+  const { username, email, password, role } = req.body;
 
-    if (existingUser) {
-      return res.status(400).json({
-        message: "User already exists",
-      });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user as a normal user
-    const newUser = await User.create({
-      username,
-      email,
-      password: hashedPassword,
-      role: "user",
-    });
-
-    res.status(201).json({
-      message: "User registered successfully",
-      user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        role: newUser.role,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  if (!username || !email || !password) {
+    res.status(400);
+    throw new Error('Username, email and password are required');
   }
-};
 
-// Login user
-const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Find user by email
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({
-        message: "Invalid email or password",
-      });
-    }
-
-    // Compare entered password with hashed password
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      user.password
+  const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+  if (existingUser) {
+    res.status(400);
+    throw new Error(
+      existingUser.email === email
+        ? 'A user with that email already exists'
+        : 'A user with that username already exists'
     );
-
-    if (!isPasswordCorrect) {
-      return res.status(400).json({
-        message: "Invalid email or password",
-      });
-    }
-
-    // Create JWT token
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
-
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
   }
-};
 
-module.exports = {
-  registerUser,
-  loginUser,
-};
+  const user = await User.create({
+    username,
+    email,
+    password,
+    role: role === 'host' ? 'host' : 'user',
+  });
+
+  res.status(201).json({
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    token: generateToken(user._id),
+  });
+});
+
+// @desc    Authenticate user & return a token
+// @route   POST /api/users/login
+// @access  Public
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    res.status(400);
+    throw new Error('Email and password are required');
+  }
+
+  // password has `select: false` on the schema, so it must be explicitly requested
+  const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+
+  if (!user || !(await user.matchPassword(password))) {
+    res.status(401);
+    throw new Error('Invalid email or password');
+  }
+
+  res.json({
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    token: generateToken(user._id),
+  });
+});
+
+// @desc    Get the currently logged-in user (used to persist sessions on refresh)
+// @route   GET /api/users/me
+// @access  Private
+const getMe = asyncHandler(async (req, res) => {
+  // req.user is set by the `protect` middleware
+  res.json({
+    _id: req.user._id,
+    username: req.user.username,
+    email: req.user.email,
+    role: req.user.role,
+  });
+});
+
+module.exports = { registerUser, loginUser, getMe };

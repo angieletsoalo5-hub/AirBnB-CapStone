@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
 import AdminHeader from "../components/AdminHeader";
+import { useAuth } from "../context/AuthContext";
 
 function AdminDashboard() {
-  const user = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
+  const { user } = useAuth();
 
   return (
     <div className="admin-dashboard">
@@ -15,9 +14,7 @@ function AdminDashboard() {
           ADMIN DASHBOARD
         </p>
 
-        <h1>
-          Welcome, {user.username || "Admin"}
-        </h1>
+        <h1>Welcome, {user?.username || "Host"}</h1>
 
         <p>
           Manage your Airbnb listings and reservations

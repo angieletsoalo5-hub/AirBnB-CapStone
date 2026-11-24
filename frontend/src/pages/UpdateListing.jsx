@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  getAccommodationById,
-  updateAccommodation,
-} from "../services/api.js";
+import { api } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import AdminHeader from "../components/AdminHeader";
 
 function UpdateListing() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -34,7 +33,7 @@ function UpdateListing() {
   useEffect(() => {
     const loadListing = async () => {
       try {
-        const listing = await getAccommodationById(id);
+        const listing = await api.getAccommodation(id);
 
         setFormData({
           title: listing.title || "",
@@ -44,7 +43,7 @@ function UpdateListing() {
           price: listing.price ?? "",
           image: listing.images?.[0] || "",
           amenities: listing.amenities?.join(", ") || "",
-          maxGuests: listing.maxGuests ?? "",
+          maxGuests: listing.guests ?? "",
           bedrooms: listing.bedrooms ?? "",
           bathrooms: listing.bathrooms ?? "",
           weeklyDiscount: listing.weeklyDiscount ?? "",
@@ -76,7 +75,7 @@ function UpdateListing() {
       setSaving(true);
       setMessage("");
 
-      await updateAccommodation(id, {
+      await api.updateAccommodation(id, {
         title: formData.title,
         description: formData.description,
         location: formData.location,
@@ -89,7 +88,7 @@ function UpdateListing() {
           .split(",")
           .map((item) => item.trim())
           .filter(Boolean),
-        maxGuests: Number(formData.maxGuests),
+        guests: Number(formData.maxGuests),
         bedrooms: Number(formData.bedrooms),
         bathrooms: Number(formData.bathrooms),
         weeklyDiscount: Number(
@@ -104,7 +103,7 @@ function UpdateListing() {
         occupancyTaxes: Number(
           formData.occupancyTaxes || 0
         ),
-      });
+      }, token);
 
       navigate("/admin/listings");
     } catch (error) {

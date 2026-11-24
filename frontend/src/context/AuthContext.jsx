@@ -1,0 +1,66 @@
+/**
+ * AuthContext.jsx
+ *
+ * Provides JWT-based authentication state for the entire app.
+ *
+ * Usage:
+ *   const { user, token, loading, login, logout } = useAuth();
+ */
+
+import { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../api/client';
+
+const AuthContext = createContext(null);
+
+const STORAGE_KEY = 'token';
+
+export function AuthProvider({ children }) {
+  const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY));
+  const [user, setUser]   = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Re-hydrate the user object on every page refresh
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    api
+      .getCurrentUser(token)
+      .then((u) => setUser({ _id: u._id, username: u.username, email: u.email, role: u.role }))
+      .catch(() => {
+        // Token is invalid or expired — clear it silently
+        localStorage.removeItem(STORAGE_KEY);
+        setToken(null);
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  async function login(email, password) {
+    const data = await api.login(email, password);
+    const loggedInUser = { _id: data._id, username: data.username, email: data.email, role: data.role };
+    localStorage.setItem(STORAGE_KEY, data.token);
+    setToken(data.token);
+    setUser(loggedInUser);
+    return loggedInUser;
+  }
+
+  function logout() {
+    localStorage.removeItem(STORAGE_KEY);
+    setToken(null);
+    setUser(null);
+  }
+
+  return (
+    <AuthContext.Provider value={{ token, user, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
+  return ctx;
+}

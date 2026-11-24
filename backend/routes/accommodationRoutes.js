@@ -1,40 +1,25 @@
-const express = require("express");
-
-const router = express.Router();
-
+const express = require('express');
 const {
   createAccommodation,
   getAccommodations,
-  getAvailableAccommodations,
   getAccommodationById,
   updateAccommodation,
   deleteAccommodation,
-} = require("../controllers/accommodationController");
+} = require('../controllers/accommodationController');
+const { protect, authorize } = require('../middleware/authMiddleware');
+const upload = require('../middleware/upload');
 
-const {
-  protect,
-  adminOnly,
-} = require("../middleware/authMiddleware");
+const router = express.Router();
 
-// Get all accommodations
-router.get("/", getAccommodations);
+router
+  .route('/')
+  .get(getAccommodations)
+  .post(protect, authorize('host'), upload.array('images', 10), createAccommodation);
 
-// Get available accommodations by selected dates
-router.get("/available", getAvailableAccommodations);
-
-// Admin-only test route
-router.get("/admin/all", protect, adminOnly, getAccommodations);
-
-// Get one accommodation by ID
-router.get("/:id", getAccommodationById);
-
-// Create a new accommodation
-router.post("/", protect, createAccommodation);
-
-// Update an accommodation
-router.put("/:id", protect, updateAccommodation);
-
-// Delete an accommodation
-router.delete("/:id", protect, deleteAccommodation);
+router
+  .route('/:id')
+  .get(getAccommodationById)
+  .put(protect, authorize('host'), upload.array('images', 10), updateAccommodation)
+  .delete(protect, authorize('host'), deleteAccommodation);
 
 module.exports = router;

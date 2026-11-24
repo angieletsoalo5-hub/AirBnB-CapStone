@@ -525,10 +525,18 @@ nav a:hover {
 }
 
 .admin-login-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 30px;
   color: #ff385c;
   font-size: 28px;
   font-weight: 700;
+}
+
+.admin-login-logo img {
+  width: 30px;
+  height: 30px;
 }
 
 .admin-login-card h1 {
@@ -627,9 +635,17 @@ nav a:hover {
 }
 
 .admin-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: #ff385c;
   font-size: 28px;
   font-weight: 700;
+}
+
+.admin-logo img {
+  width: 30px;
+  height: 30px;
 }
 
 .admin-navigation {
